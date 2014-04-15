@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if [ "$FLASK_ENV" == "production" ]; then
+    celery worker -A app.tasks --loglevel=INFO -b=$RABBITMQ_URL
+    # concurrent worker: 
+    # celery worker -A app.tasks --loglevel=INFO -b=$RABBITMQ_URL --concurrency=1000 --pool=gevent
+else
+	RABBITMQ_URL ?= "amqp://guest:guest@localhost//"
+	celery worker -A app.tasks --loglevel=DEBUG -b=$RABBITMQ_URL
+	celery flower -A app.tasks --loglevel=DEBUG -b=$RABBITMQ_URL --broker_api=$RABBITMQ_URL/api
+	# concurrent worker: 
+	# celery worker -A app.tasks --loglevel=DEBUG -b=$RABBITMQ_URL --concurrency=1000 --pool=gevent
+fi
