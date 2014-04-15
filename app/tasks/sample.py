@@ -2,7 +2,7 @@
 import requests, os
 from app.tasks import celery
 
-from socialscraper import twitter
+from socialscraper.socialscraper import twitter
 
 @celery.task(name='addition')
 def addition(x, y):
