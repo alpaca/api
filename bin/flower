@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if [ "$FLASK_ENV" == "production" ]; then
+	echo "Hello World"
+else
+	celery flower -A app.tasks --loglevel=DEBUG -b=$RABBITMQ_URL --broker_api=$RABBITMQ_URL/api
+fi
