@@ -2,7 +2,7 @@
 import requests, os
 from app.tasks import celery
 
-from socialscraper.socialscraper import twitter
+from socialscraper import twitter
 
 from celery import chord, group, chain, signature
 

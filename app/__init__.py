@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import os, sys, logging
+import os, sys, logging, site
 from flask import Flask
 from . import settings
+from . import environment
 
 # Allow importing libraries from lib folder
-sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '/../lib')
 
 app = Flask(__name__)
 app.config.from_object(settings.config)

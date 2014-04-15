@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from .. import app as flask_app # app var conflicts with celery
+from .. import environment
 from ..settings import config
 from celery import Celery
 
