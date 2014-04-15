@@ -6,10 +6,6 @@ from socialscraper.socialscraper import twitter
 
 from celery import chord, group, chain, signature
 
-@celery.task(name='addition')
-def addition(x, y):
-	return x + y
-
 @celery.task(name='scrape.twitter.followers')
 def scrape_followers(username):
 	scraper = twitter.TwitterScraper()
@@ -29,15 +25,3 @@ def scrape_feed(username):
 	scraper = twitter.TwitterScraper()
 	tweets = scraper.get_feed_by_screen_name(username)
 	return str(tweets)
-
-
-@celery.task(name='scrape')
-def urlopen(url):
-    print('Opening: {0}'.format(url))
-    try:
-        resp = requests.get(url)
-    except Exception as exc:
-        print('Exception for {0}: {1!r}'.format(url, exc))
-        return url, '', 0
-    print('Done with: {0}'.format(url))
-    return url, resp.text, 1
