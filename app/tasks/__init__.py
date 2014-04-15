@@ -2,7 +2,7 @@
 
 from .. import app as flask_app # app var conflicts with celery
 from .. import environment
-from ..settings import config
+from .. import settings
 from celery import Celery
 
 def make_celery(flask_app):
@@ -19,7 +19,7 @@ def make_celery(flask_app):
 	"""
 
 	celery = Celery()
-	celery.config_from_object(config)
+	celery.config_from_object(settings.config)
 
 	TaskBase = celery.Task
 	class ContextTask(TaskBase):
