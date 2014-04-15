@@ -1,17 +1,18 @@
-from . import db
+from . import db, BaseModel
 
-class Tweet(db.Model):
+class Tweet(db.Model, BaseModel):
     __tablename__ = 'tweets'
     id = db.Column(db.Integer,primary_key=True)
     timestamp = db.Column(db.Integer)
     user = db.Column(db.BigInteger, db.ForeignKey("twitter_users.id"), nullable=False)
     content = db.Column(db.Text)
 
-    def __init__(self,id,timestamp,screen_name,content):
+    def __init__(self,id,timestamp,screen_name,content,created_at=None,updated_at=None):
         self.id = id
         self.timestamp = timestamp
         self.user = screen_name
         self.content = content
+        BaseModel.__init__(self,created_at,updated_at)
 
     def __repr__(self):
         return "Tweet " + str(self.id) + ": " + (self.content if self.content else "")
