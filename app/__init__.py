@@ -24,7 +24,8 @@ else:
 app.logger.addHandler(settings.log_handler)
 
 from .models import db
-from .models.user import User
+from .models.tweet import Tweet
+from .models.twitter_user import TwitterUser
 
 # Example SQLAlchemy Use
 

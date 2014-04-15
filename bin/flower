@@ -3,5 +3,6 @@
 if [ "$FLASK_ENV" == "production" ]; then
 	echo "Hello World"
 else
+	RABBITMQ_URL=${RABBITMQ_URL:-"amqp://guest:guest@localhost//"}
 	celery flower -A app.tasks --loglevel=DEBUG -b=$RABBITMQ_URL --broker_api=$RABBITMQ_URL/api
 fi
