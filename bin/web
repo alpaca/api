@@ -3,5 +3,6 @@
 if [ "$FLASK_ENV" == "production" ]; then
     gunicorn app:app -b 0.0.0.0:$PORT
 else
+	PORT=${PORT:-"5000"}
 	python manage.py runserver -p $PORT
 fi
