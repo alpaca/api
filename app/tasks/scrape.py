@@ -70,7 +70,13 @@ def scrape_feed(username):
 #                        Facebook                        #
 # ------------------------------------------------------ #
 
-@celery.task(name='scrape.facebook.feed')
+@celery.task(name='scrape.facebook.fan')
 def scrape_fan(username):
     scraper = twitter.FacebookScraper()
-    # tweets = scraper.get_feed_by_screen_name(username)
+    self.scraper.add_user(email=os.getenv("FACEBOOK_USERNAME"), password=os.getenv("FACEBOOK_PASSWORD"))
+    self.scraper.login()
+    subtasks = []
+
+
+
+@celery.task(name='scrape.facebook.')
