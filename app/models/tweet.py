@@ -2,9 +2,9 @@ from . import db, BaseModel
 
 class Tweet(db.Model, BaseModel):
     __tablename__ = 'tweets'
-    id = db.Column(db.Integer,primary_key=True)
-    timestamp = db.Column(db.Integer)
-    user = db.Column(db.BigInteger, db.ForeignKey("twitter_users.id"), nullable=False)
+    id = db.Column(db.BigInteger,primary_key=True)
+    timestamp = db.Column(db.BigInteger)
+    user = db.Column(db.String(120), db.ForeignKey("twitter_users.screen_name"), nullable=False)
     content = db.Column(db.Text)
 
     def __init__(self,id,timestamp,screen_name,content,created_at=None,updated_at=None):

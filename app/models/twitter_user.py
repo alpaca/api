@@ -3,7 +3,7 @@ from . import db, BaseModel
 class TwitterUser(db.Model, BaseModel):
     __tablename__ = 'twitter_users'
     id = db.Column(db.BigInteger, primary_key=True)
-    screen_name = db.Column(db.String(80), unique=True)
+    screen_name = db.Column(db.String(120), unique=True, nullable=False)
 
     def __init__(self,user_id,screen_name,created_at=None,updated_at=None):
         self.id = user_id
