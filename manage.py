@@ -6,6 +6,9 @@ import sys
 if 'threading' in sys.modules: del sys.modules['threading']
 import gevent.monkey; gevent.monkey.patch_thread()
 
+import logging
+logging.basicConfig(level=logging.INFO)
+
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.script import Manager, Server
 from flask.ext.migrate import Migrate, MigrateCommand
@@ -30,29 +33,34 @@ class GeventSocketIOServer(Server):
 manager.add_command("runserver", GeventSocketIOServer(host="0.0.0.0"))
 manager.add_command('db', MigrateCommand)
 
-@manager.command 
-def presentation(name):
+test_fb_users = [
+    ('Al Johri', 'al.johri'),
+    ('Moritz Gellner', 'moritz.gellner'), # fb works
+    ('Michael Marasco', 'michaelamarasco'), 
+    ('Todd Warren', 'todd.warren.seattle'),
+    ('Rich Gordon', 'richgor'),
+    ('Chris Riesbeck', 'chris.riesbeck'),
+    ('Steve Olechowski', 'steve.olechowski'), # fb works, twitter works
+    ('Megan Everett', 'megan.everett'),
+    ('Mitra Veeramasuneni', 'vlmitra'), # fb works, twitter works
+    ('Ryan Mcafee', 'mcafeeryan'),
+    ('Ben Rafshoon', 'benrafshoon') # fb works, twitter works
+]
 
-    # https://www.facebook.com/michaelamarasco?fref=ts
-    # https://www.facebook.com/todd.warren.seattle?fref=ts
-    # https://www.facebook.com/richgor?fref=ts
-    # https://www.facebook.com/chris.riesbeck?fref=ts
-    # https://www.facebook.com/steve.olechowski
-    # https://www.facebook.com/megan.everett
-    # https://www.facebook.com/vlmitra?fref=ts
-    # https://www.facebook.com/mcafeeryan?fref=ts
-    # https://www.facebook.com/benrafshoon?fref=ts    
-    from identityresolver.social import SocialProfileResolver, ResolvedPerson
+# python manage.py resolve "Moritz Gellner"
+# python manage.py resolve "Steve Olechowski"
+# python manage.py resolve "Mitra Veeramasuneni"
+# python manage.py resolve "Ben Rafshoon"
+# python manage.py resolve "Al Johri"
+
+@manager.command
+def facebook(username):
     from socialscraper.facebook import FacebookScraper
-    from socialscraper.twitter import TwitterScraper
     pp = pprint.PrettyPrinter(indent=4)
-
-    resolver = SocialProfileResolver()
     facebook_scraper = FacebookScraper()
     facebook_scraper.add_user(email=os.getenv("FACEBOOK_EMAIL"), password=os.getenv("FACEBOOK_PASSWORD"))
     facebook_scraper.login()
-    twitter_scraper = TwitterScraper()
-    
+
     def pages_liked(username):
         for item in facebook_scraper.graph_search(username, "pages-liked"):
             print item
@@ -65,20 +73,32 @@ def presentation(name):
         from socialscraper.facebook import timeline
         timeline.search(facebook_scraper.browser, facebook_scraper.cur_user, username)
 
+    pages_liked(username)
+    print "\n==========\n"
+    about(username)
+    print "\n==========\n"
+    timeline(username)
+    print "\n==========\n"
+
+@manager.command
+def twitter(username):
+    from socialscraper.twitter import TwitterScraper
+    twitter_scraper = TwitterScraper()
+
+    twitter_scraper.get_feed_by_screen_name(resolved.twitter_username)
+
+@manager.command 
+def resolve(name, location=None):
+    from identityresolver.social import SocialProfileResolver, ResolvedPerson
+    resolver = SocialProfileResolver()
+    
     def resolve(name):
-        for person in resolver.resolve([ResolvedPerson(0,full_name=name)]):
+        for person in resolver.resolve([ResolvedPerson(0,full_name=name,location=location)]):
             print person
             print "\n==========\n"
             return person
 
     resolved = resolve(name)
-    pages_liked(resolved.facebook_username)
-    print "\n==========\n"
-    about(resolved.facebook_username)
-    print "\n==========\n"
-    timeline(resolved.facebook_username)
-    print "\n==========\n"
-    twitter_scraper.get_feed_by_screen_name(resolved.twitter_username)
 
 if __name__ == "__main__":
     manager.run()
