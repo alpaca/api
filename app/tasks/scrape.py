@@ -1,24 +1,25 @@
 # -*- coding: utf-8 -*-
-import requests, os
+import os
 from app.tasks import celery
 from app.models import db
 
 from app.models.tweet import Tweet
 from app.models.twitter_user import TwitterUser
 
-from socialscraper import twitter
+from socialscraper import twitter, facebook
 from sqlalchemy.exc import IntegrityError
 
 # ----------------------------------------------------- #
 #                        Twitter                        #
 # ----------------------------------------------------- #
+twitter_scraper = twitter.TwitterScraper()
+twitter_scraper.add_user(username=os.getenv("TWITTER_USERNAME"),password=os.getenv('TWITTER_PASSWORD'))
 
 @celery.task(name='scrape.twitter.followers')
 def scrape_followers(username):
-    scraper = twitter.TwitterScraper()
-    scraper.add_user(username=os.getenv("TWITTER_USERNAME"),password=os.getenv('TWITTER_PASSWORD'))
+    twitter_scraper.add_user(username=os.getenv("TWITTER_USERNAME"),password=os.getenv('TWITTER_PASSWORD'))
     subtasks = []
-    for follower in scraper.get_followers('aljohri'):
+    for follower in twitter_scraper.get_followers('aljohri'):
         #print follower.screen_name
         sig = celery.send_task('scrape.twitter.feed', args=[follower.screen_name], queue='celery')
         subtasks.append(sig)
@@ -94,28 +95,28 @@ def scrape_feed(username):
 # not running any mutators.
 # http://stackoverflow.com/questions/18188044/is-the-session-object-from-pythons-requests-library-thread-safe
 
+facebook_scraper = facebook.FacebookScraper()
+facebook_scraper.add_user(email=os.getenv("FACEBOOK_USERNAME"), password=os.getenv("FACEBOOK_PASSWORD"))
+facebook_scraper.login()
+
 @celery.task(name='scrape.facebook.fan')
 def scrape_fan(username):
-    scraper = twitter.FacebookScraper()
-    self.scraper.add_user(email=os.getenv("FACEBOOK_USERNAME"), password=os.getenv("FACEBOOK_PASSWORD"))
-    self.scraper.login()
-    subtasks = []
-    # sig1 = celery.send_task('scrape.facebook.fan.about', args=[follower.screen_name], queue='celery')
-    # sig2 = celery.send_task('scrape.facebook.fan.likes', args=[follower.screen_name], queue='celery')
-    # subtasks.append(sig1)
-    # subtasks.append(sig2)
+
+    celery.send_task('scrape.facebook.fan.about', args=[username], queue='celery')
+    celery.send_task('scrape.facebook.fan.likes', args=[username], queue='celery')
+    celery.send_task('scrape.facebook.fan.timeline', args=[username], queue='celery')
 
 @celery.task(name='scrape.facebook.fan.about')
-def scrape_fan_about(scraper, username):
-    return scraper.get_about(username)
+def scrape_fan_about(username):
+    return facebook_scraper.get_about(username)
 
 @celery.task(name='scrape.facebook.fan.likes')
-def scrape_fan_likes(scraper, username):
-    for fan in scraper.graph_search(username, "pages-liked"):
+def scrape_fan_likes(username):
+    for fan in facebook_scraper.graph_search(username, "pages-liked"):
         print fan # commit to db
     return True
 
 @celery.task(name='scrape.facebook.fan.feed')
 @celery.task(name='scrape.facebook.fan.timeline')
-def scrape_fan_feed(scraper, username):
+def scrape_fan_feed(username):
     pass # TODO: need to implement generator in package side (Al)
