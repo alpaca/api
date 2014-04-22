@@ -47,11 +47,11 @@ test_fb_users = [
     ('Ben Rafshoon', 'benrafshoon') # fb works, twitter works
 ]
 
-# python manage.py resolve "Moritz Gellner"
-# python manage.py resolve "Steve Olechowski"
+# python manage.py resolve "Steve Olechowski" --city="Chicago" --state="IL"
 # python manage.py resolve "Mitra Veeramasuneni"
 # python manage.py resolve "Ben Rafshoon"
 # python manage.py resolve "Rich Gordon" --city="Evanston" --state="IL"
+# python manage.py resolve "Daniel Thirman" --city="Wilmette" --state="IL"
 
 # python manage.py facebook moritz.gellner
 # python manage.py facebook steve.olechowski
