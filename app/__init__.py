@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import os, sys, logging, site
+# gevent monkey patch
+import sys
+if 'threading' in sys.modules:
+    del sys.modules['threading']
+	# raise Exception('threading module loaded before patching!')
+import gevent.monkey; gevent.monkey.patch_thread()
+
+import os, logging, site
 from flask import Flask
 from . import settings
 from . import environment
@@ -13,6 +20,7 @@ app.config.from_object(settings.config)
 from . import models
 from . import controllers
 from . import routes
+from . import socketio
 
 if not app.debug:
     app.logger.setLevel(logging.INFO)

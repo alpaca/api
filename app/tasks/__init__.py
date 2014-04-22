@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 
+# gevent monkey patch
+import sys
+if 'threading' in sys.modules:
+    del sys.modules['threading']
+	# raise Exception('threading module loaded before patching!')
+import gevent.monkey; gevent.monkey.patch_thread()
+
 from .. import app as flask_app # app var conflicts with celery
 from .. import environment
 from .. import settings
@@ -35,4 +42,5 @@ celery = make_celery(flask_app)
 
 __all__ = ['scrape']
 
-from app.tasks import *
+# import the tasks you need
+# from app.tasks import *
