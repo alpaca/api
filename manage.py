@@ -54,7 +54,6 @@ test_fb_users = [
 # python manage.py resolve "Daniel Thirman" --city="Wilmette" --state="IL"
 # python manage.py resolve "Moritz Gellner"
 
-# python manage.py facebook steve.olechowski
 # python manage.py facebook vlmitra
 # python manage.py facebook benrafshoon
 # python manage.py facebook richgor
@@ -63,6 +62,11 @@ test_fb_users = [
 
 # python manage.py facebook michaelamarasco
 # python manage.py facebook todd.warren.seattle
+
+# python manage.py twitter steveobd
+# python manage.py twitter vlmitra
+# python manage.py twitter captainshoon
+# python manage.py twitter richgor
 
 @manager.command
 def facebook(username):
