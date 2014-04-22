@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# gevent monkey patch
 import sys
-if 'threading' in sys.modules:
-    del sys.modules['threading']
-	# raise Exception('threading module loaded before patching!')
+
+# gevent monkey patch
+if 'threading' in sys.modules: del sys.modules['threading']
 import gevent.monkey; gevent.monkey.patch_thread()
 
-from .. import app as flask_app # app var conflicts with celery
+from .. import app as flask_app # app var conflicts with celery, needs absolute import from future?
 from .. import environment
 from .. import settings
 from celery import Celery
