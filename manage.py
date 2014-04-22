@@ -94,7 +94,9 @@ def twitter(username):
     from socialscraper.twitter import TwitterScraper
     twitter_scraper = TwitterScraper()
 
-    twitter_scraper.get_feed_by_screen_name(username)
+    tweets = twitter_scraper.get_feed_by_screen_name(username)
+    for tweet in tweets:
+        print tweet
 
 @manager.command 
 def resolve(name, city=None, state=None):
