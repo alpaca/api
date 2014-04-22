@@ -88,12 +88,12 @@ def twitter(username):
     twitter_scraper.get_feed_by_screen_name(username)
 
 @manager.command 
-def resolve(name, location=None):
+def resolve(name, city=None, state=None):
     from identityresolver.social import SocialProfileResolver, ResolvedPerson
     resolver = SocialProfileResolver()
     
     def resolve(name):
-        for person in resolver.resolve([ResolvedPerson(0,full_name=name,location=location)]):
+        for person in resolver.resolve([ResolvedPerson(0,full_name=name,city=city,state=state)]):
             print person
             print "\n==========\n"
             return person
