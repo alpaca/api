@@ -85,7 +85,7 @@ def twitter(username):
     from socialscraper.twitter import TwitterScraper
     twitter_scraper = TwitterScraper()
 
-    twitter_scraper.get_feed_by_screen_name(resolved.twitter_username)
+    twitter_scraper.get_feed_by_screen_name(username)
 
 @manager.command 
 def resolve(name, location=None):
