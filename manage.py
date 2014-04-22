@@ -52,12 +52,14 @@ test_fb_users = [
 # python manage.py resolve "Ben Rafshoon"
 # python manage.py resolve "Rich Gordon" --city="Evanston" --state="IL"
 # python manage.py resolve "Daniel Thirman" --city="Wilmette" --state="IL"
+# python manage.py resolve "Moritz Gellner"
 
-# python manage.py facebook moritz.gellner
 # python manage.py facebook steve.olechowski
 # python manage.py facebook vlmitra
 # python manage.py facebook benrafshoon
 # python manage.py facebook richgor
+# python manage.py facebook dthirman
+# python manage.py facebook moritz.gellner
 
 # python manage.py facebook michaelamarasco
 # python manage.py facebook todd.warren.seattle
