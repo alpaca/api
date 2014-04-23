@@ -19,7 +19,8 @@ class BaseModel(object):
 #################################################################################
 
 from ..utils import get_model_properties
-from socialscraper import facebook, twitter
+from socialscraper import facebook
+from socialscraper import twitter
 
 FacebookUser = type('FacebookUser', (facebook.models.FacebookUser, db.Model, BaseModel), get_model_properties(facebook.models.FacebookUser))
 FacebookFamily = type('FacebookFamily', (facebook.models.FacebookFamily, db.Model, BaseModel), get_model_properties(facebook.models.FacebookFamily))
@@ -30,9 +31,12 @@ FacebookCategoriesPages = type('FacebookCategoriesPages', (facebook.models.Faceb
 FacebookStatus = type('FacebookStatus', (facebook.models.FacebookStatus, db.Model, BaseModel), get_model_properties(facebook.models.FacebookStatus))
 FacebookPagesUsers = type('FacebookPagesUsers', (facebook.models.FacebookPagesUsers, db.Model, BaseModel), get_model_properties(facebook.models.FacebookPagesUsers))
 
+TwitterUser = type('TwitterUser', (twitter.models.TwitterUser, db.Model, BaseModel), get_model_properties(twitter.models.TwitterUser))
+TwitterTweet = type('TwitterTweet', (twitter.models.TwitterTweet, db.Model, BaseModel), get_model_properties(twitter.models.TwitterTweet))
+
 #################################################################################
 
-__all__ = ['twitter_user', 'tweet']
+__all__ = []
 
 from app.models import *
 

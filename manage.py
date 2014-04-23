@@ -19,18 +19,19 @@ from app import app
 from app.models import db
 from app.tasks import celery
 from app.controllers import api
-from app.handlers import socketio
+
 
 manager = Manager(app)
 migrate = Migrate(app, db)
 
-class GeventSocketIOServer(Server):
-    def handle(self, app, host, port, use_debugger, use_reloader,
-               threaded, processes, passthrough_errors):
+# from app.handlers import socketio
+# class GeventSocketIOServer(Server):
+#     def handle(self, app, host, port, use_debugger, use_reloader,
+#                threaded, processes, passthrough_errors):
 
-        socketio.run(app, host=host, port=port)
-
+#         socketio.run(app, host=host, port=port)
 # manager.add_command("runserver", GeventSocketIOServer(host="0.0.0.0"))
+
 manager.add_command("runserver", Server(host="0.0.0.0"))
 manager.add_command('db', MigrateCommand)
 

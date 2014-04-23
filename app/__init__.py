@@ -12,7 +12,6 @@ app.config.from_object(settings.config)
 from . import models
 from . import controllers
 from . import routes
-from . import handlers
 
 # Set up logging
 
