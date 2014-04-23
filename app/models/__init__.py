@@ -15,12 +15,8 @@ class BaseModel(object):
 		self.created_at = created_at
 		self.updated_at = updated_at
 
-# Instantiate Social Scraper Models
-#################################################################################
-
 from ..utils import get_model_properties
-from socialscraper import facebook
-from socialscraper import twitter
+from socialscraper import facebook, twitter
 
 FacebookUser = type('FacebookUser', (facebook.models.FacebookUser, db.Model, BaseModel), get_model_properties(facebook.models.FacebookUser))
 FacebookFamily = type('FacebookFamily', (facebook.models.FacebookFamily, db.Model, BaseModel), get_model_properties(facebook.models.FacebookFamily))
@@ -33,8 +29,6 @@ FacebookPagesUsers = type('FacebookPagesUsers', (facebook.models.FacebookPagesUs
 
 TwitterUser = type('TwitterUser', (twitter.models.TwitterUser, db.Model, BaseModel), get_model_properties(twitter.models.TwitterUser))
 TwitterTweet = type('TwitterTweet', (twitter.models.TwitterTweet, db.Model, BaseModel), get_model_properties(twitter.models.TwitterTweet))
-
-#################################################################################
 
 __all__ = []
 

@@ -6,6 +6,6 @@ cd api
 git submodule update --remote
 cd lib/socialscraper
 git checkout master
-cd lib/identityresolver
+cd ../identityresolver
 git checkout master
 ```
