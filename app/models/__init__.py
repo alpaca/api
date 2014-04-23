@@ -28,9 +28,9 @@ FacebookPagesUsers = type('FacebookPagesUsers', (facebook.models.FacebookPagesUs
 TwitterUser = type('TwitterUser', (twitter.models.TwitterUser, db.Model, BaseModel), get_model_properties(twitter.models.TwitterUser))
 TwitterTweet = type('TwitterTweet', (twitter.models.TwitterTweet, db.Model, BaseModel), get_model_properties(twitter.models.TwitterTweet))
 
-FacebookUser.pages = db.relationship('FacebookFriend', secondary=FacebookFriend.__table__)
-FacebookUser.friends = db.relationship('FacebookPage', secondary=FacebookPagesUsers.__table__)
-FacebookPage.users = db.relationship('FacebookUser', secondary=FacebookPagesUsers.__table__)
+#FacebookUser.pages = db.relationship('FacebookFriend', secondary=FacebookFriend.__table__)
+#FacebookUser.friends = db.relationship('FacebookPage', secondary=FacebookPagesUsers.__table__)
+#FacebookPage.users = db.relationship('FacebookUser', secondary=FacebookPagesUsers.__table__)
 
 # FacebookUser.locations = db.relationship('FacebookLocation') uid -> gid
 # FacebookPage.locations = db.relationship('FacebookLocation') page_id -> gid
