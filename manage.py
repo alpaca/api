@@ -71,7 +71,7 @@ test_fb_users = [
 # python manage.py twitter richgor
 
 @manager.command
-def facebook(username):
+def facebook(scrape_type, username):
     from socialscraper.facebook import FacebookScraper
     pp = pprint.PrettyPrinter(indent=4)
     facebook_scraper = FacebookScraper()
@@ -90,12 +90,12 @@ def facebook(username):
         from socialscraper.facebook import timeline
         timeline.search(facebook_scraper.browser, facebook_scraper.cur_user, username)
 
-    pages_liked(username)
-    print "\n==========\n"
-    about(username)
-    print "\n==========\n"
-    timeline(username)
-    print "\n==========\n"
+    if scrape_type == "about":
+        about(username)
+    elif scrape_type == "fans":
+        pages_liked(username)
+    elif scrape_type == "timeline":
+        timeline(username)
 
 @manager.command
 def twitter(username):
