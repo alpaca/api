@@ -3,7 +3,7 @@ Setup
 ```
 git clone git@github.com:alpaca/api.git
 cd api
-git submodule update --remote
+git submodule update --init
 cd lib/socialscraper
 git checkout master
 cd ../identityresolver
