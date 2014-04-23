@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import sys
+import sys, csv, os
 
 # gevent monkey patch
 if 'threading' in sys.modules: del sys.modules['threading']
@@ -12,6 +12,7 @@ logging.basicConfig(level=logging.INFO)
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.script import Manager, Server
 from flask.ext.migrate import Migrate, MigrateCommand
+import flask.ext.migrate as flmigrate
 
 import os, pprint
 
@@ -20,6 +21,8 @@ from app.models import db
 from app.tasks import celery
 from app.controllers import api
 
+
+from sqlalchemy.exc import IntegrityError
 
 manager = Manager(app)
 migrate = Migrate(app, db)
@@ -118,6 +121,58 @@ def resolve(name, city=None, state=None):
             return person
 
     resolved = resolve(name)
+
+@manager.command
+def import_csv(path,pkey_colname):
+    csvname = path.split('/')[-1]
+
+    def _make_header_arr(raw_header,data_row):
+        fields = []
+        for h_col,d_col in zip(raw_header,data_row):
+            is_pkey = True if (pkey_colname in h_col) else False
+            if is_pkey:
+                print "Found pkey: %s" % h_col
+            py_type = 'str'
+            # try:
+            #     float(d_col)
+            #     py_type = 'float'
+            # except ValueError:
+            #     pass
+
+            fields.append({
+                "name" : h_col,
+                "py_type" : py_type,
+                "db_type" :  "String",#"Float" if (py_type == float) else "String", || Just String for now
+                "primary_key" : is_pkey
+                })
+        return fields
+
+    from app.models.contributor import generate_contrib_model
+    with open(path, 'rbU') as csvfile:
+        csvreader = csv.reader(csvfile)
+        for idx,row in enumerate(csvreader):
+            if idx == 0:
+                raw_header = row
+            elif idx == 1: # header row
+                header = _make_header_arr(raw_header,row)
+                Contributor = generate_contrib_model(header)
+
+                # trololol
+                flmigrate.migrate()
+                flmigrate.upgrade()
+
+                print "Generated Contributor Model: %s" % str(Contributor)
+            if idx != 0:
+                contrib = Contributor(csvname)
+                for kv in zip(header,row):
+                    setattr(contrib,kv[0]['name'],eval("%s(\"%s\")" % (kv[0]['py_type'], kv[1])))
+                db.session.add(contrib)
+                try:
+                    db.session.commit()
+                except IntegrityError:
+                    print "Warning: DB Integrity Error"
+                    db.session.rollback()
+    return
 
 if __name__ == "__main__":
     manager.run()
