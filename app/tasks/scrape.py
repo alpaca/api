@@ -3,8 +3,8 @@ import os
 from app.tasks import celery
 from app.models import db
 
-from app.models.tweet import Tweet
-from app.models.twitter_user import TwitterUser
+from app.models import TwitterUser, TwitterTweet
+from app.models import FacebookUser, FacebookFamily, FacebookLocation, FacebookFriend, FacebookPage, FacebookCategories, FacebookStatus, FacebookPagesUsers
 
 from socialscraper import twitter, facebook
 from sqlalchemy.exc import IntegrityError

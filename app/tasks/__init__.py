@@ -36,6 +36,3 @@ def make_celery(flask_app):
 celery = make_celery(flask_app)
 
 __all__ = ['scrape']
-
-# import the tasks you need
-# from app.tasks import *
