@@ -30,7 +30,8 @@ class GeventSocketIOServer(Server):
 
         socketio.run(app, host=host, port=port)
 
-manager.add_command("runserver", GeventSocketIOServer(host="0.0.0.0"))
+# manager.add_command("runserver", GeventSocketIOServer(host="0.0.0.0"))
+manager.add_command("runserver", Server(host="0.0.0.0"))
 manager.add_command('db', MigrateCommand)
 
 test_fb_users = [
