@@ -92,7 +92,7 @@ def facebook(scrape_type, username):
 
     if scrape_type == "about":
         about(username)
-    elif scrape_type == "fans":
+    elif scrape_type == "pages":
         pages_liked(username)
     elif scrape_type == "timeline":
         timeline(username)

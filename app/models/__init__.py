@@ -2,8 +2,6 @@
 
 from .. import app
 from sqlalchemy import Table, MetaData, Column, ForeignKey, Integer, String, BigInteger, Date, Text, Boolean, Float
-from sqlalchemy.orm import mapper
-
 from flask.ext.sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy(app)
@@ -29,6 +27,13 @@ FacebookPagesUsers = type('FacebookPagesUsers', (facebook.models.FacebookPagesUs
 
 TwitterUser = type('TwitterUser', (twitter.models.TwitterUser, db.Model, BaseModel), get_model_properties(twitter.models.TwitterUser))
 TwitterTweet = type('TwitterTweet', (twitter.models.TwitterTweet, db.Model, BaseModel), get_model_properties(twitter.models.TwitterTweet))
+
+FacebookUser.pages = db.relationship('FacebookFriend', secondary=FacebookFriend.__table__)
+FacebookUser.friends = db.relationship('FacebookPage', secondary=FacebookPagesUsers.__table__)
+FacebookPage.users = db.relationship('FacebookUser', secondary=FacebookPagesUsers.__table__)
+
+# FacebookUser.locations = db.relationship('FacebookLocation') uid -> gid
+# FacebookPage.locations = db.relationship('FacebookLocation') page_id -> gid
 
 __all__ = []
 
