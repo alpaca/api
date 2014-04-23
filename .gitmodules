@@ -2,3 +2,7 @@
 	path = lib/socialscraper
 	url = git@github.com:alpaca/socialscraper.git
 	branch = master
+[submodule "lib/identityresolver"]
+	path = lib/identityresolver
+	url = https://github.com/alpaca/identityresolver
+	branch = master

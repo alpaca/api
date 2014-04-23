@@ -20,20 +20,22 @@ from app import app
 from app.models import db
 from app.tasks import celery
 from app.controllers import api
-from app.handlers import socketio
+
 
 from sqlalchemy.exc import IntegrityError
 
 manager = Manager(app)
 migrate = Migrate(app, db)
 
-class GeventSocketIOServer(Server):
-    def handle(self, app, host, port, use_debugger, use_reloader,
-               threaded, processes, passthrough_errors):
+# from app.handlers import socketio
+# class GeventSocketIOServer(Server):
+#     def handle(self, app, host, port, use_debugger, use_reloader,
+#                threaded, processes, passthrough_errors):
 
-        socketio.run(app, host=host, port=port)
+#         socketio.run(app, host=host, port=port)
+# manager.add_command("runserver", GeventSocketIOServer(host="0.0.0.0"))
 
-manager.add_command("runserver", GeventSocketIOServer(host="0.0.0.0"))
+manager.add_command("runserver", Server(host="0.0.0.0"))
 manager.add_command('db', MigrateCommand)
 
 test_fb_users = [
@@ -72,7 +74,7 @@ test_fb_users = [
 # python manage.py twitter richgor
 
 @manager.command
-def facebook(username):
+def facebook(scrape_type, username):
     from socialscraper.facebook import FacebookScraper
     pp = pprint.PrettyPrinter(indent=4)
     facebook_scraper = FacebookScraper()
@@ -91,12 +93,12 @@ def facebook(username):
         from socialscraper.facebook import timeline
         timeline.search(facebook_scraper.browser, facebook_scraper.cur_user, username)
 
-    pages_liked(username)
-    print "\n==========\n"
-    about(username)
-    print "\n==========\n"
-    timeline(username)
-    print "\n==========\n"
+    if scrape_type == "about":
+        about(username)
+    elif scrape_type == "pages":
+        pages_liked(username)
+    elif scrape_type == "timeline":
+        timeline(username)
 
 @manager.command
 def twitter(username):

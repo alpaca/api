@@ -2,10 +2,6 @@
 
 import sys
 
-# gevent monkey patch
-if 'threading' in sys.modules: del sys.modules['threading']
-import gevent.monkey; gevent.monkey.patch_thread()
-
 from .. import app as flask_app # app var conflicts with celery, needs absolute import from future?
 from .. import environment
 from .. import settings
@@ -40,6 +36,3 @@ def make_celery(flask_app):
 celery = make_celery(flask_app)
 
 __all__ = ['scrape']
-
-# import the tasks you need
-# from app.tasks import *
