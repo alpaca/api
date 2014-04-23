@@ -18,37 +18,21 @@ class BaseModel(object):
 # Instantiate Social Scraper Models
 #################################################################################
 
-from socialscraper.facebook.models import User, Family, Friend, Page, CategoriesPages, Status, PagesUsers, Location
-socialscraper_models = ['User', 'Family', 'Friend', 'Page', 'CategoriesPages', 'Status', 'PagesUsers', 'Location']
-# __all__ = []
-# metadata = MetaData()
-metadata = db.metadata
+from ..utils import get_model_properties
+from socialscraper import facebook, twitter
 
-def create_columns(columns):
-	# columns = map(lambda x: getattr(User, x), columns)
-	sqlalchemy_cols = []
-	for col in columns:
-		if col.primary_key and col.foreign_key:
-			sqlalchemy_cols.append(Column(col.name, eval(col.type), ForeignKey(col.foreign_key_reference), primary_key=True))
-		elif col.foreign_key:
-			sqlalchemy_cols.append(Column(col.name, eval(col.type), ForeignKey(col.foreign_key_reference)))
-		elif col.primary_key:
-			sqlalchemy_cols.append(Column(col.name, eval(col.type), primary_key=True))
-		else:
-			sqlalchemy_cols.append(Column(col.name, eval(col.type)))
-	return sqlalchemy_cols
-
-for model in socialscraper_models:
-	columns = create_columns(eval(model).get_columns())
-	propeties = {}
-	for column in columns:
-		propeties[column.name] = column
-	table = Table(eval(model).__name__.lower(), metadata, *columns)
-	mapper(eval(model) , table, properties=propeties)
-	# __all__.append(table)
+FacebookUser = type('FacebookUser', (facebook.models.FacebookUser, db.Model, BaseModel), get_model_properties(facebook.models.FacebookUser))
+FacebookFamily = type('FacebookFamily', (facebook.models.FacebookFamily, db.Model, BaseModel), get_model_properties(facebook.models.FacebookFamily))
+FacebookLocation = type('FacebookLocation', (facebook.models.FacebookLocation, db.Model, BaseModel), get_model_properties(facebook.models.FacebookLocation))
+FacebookFriend = type('FacebookFriend', (facebook.models.FacebookFriend, db.Model, BaseModel), get_model_properties(facebook.models.FacebookFriend))
+FacebookPage = type('FacebookPage', (facebook.models.FacebookPage, db.Model, BaseModel), get_model_properties(facebook.models.FacebookPage))
+FacebookCategoriesPages = type('FacebookCategoriesPages', (facebook.models.FacebookCategoriesPages, db.Model, BaseModel), get_model_properties(facebook.models.FacebookCategoriesPages))
+FacebookStatus = type('FacebookStatus', (facebook.models.FacebookStatus, db.Model, BaseModel), get_model_properties(facebook.models.FacebookStatus))
+FacebookPagesUsers = type('FacebookPagesUsers', (facebook.models.FacebookPagesUsers, db.Model, BaseModel), get_model_properties(facebook.models.FacebookPagesUsers))
 
 #################################################################################
 
+__all__ = ['twitter_user', 'tweet']
 
 from app.models import *
 
