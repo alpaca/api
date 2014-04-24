@@ -38,43 +38,8 @@ migrate = Migrate(app, db)
 manager.add_command("runserver", Server(host="0.0.0.0"))
 manager.add_command('db', MigrateCommand)
 
-test_fb_users = [
-    ('Al Johri', 'al.johri'),
-    ('Moritz Gellner', 'moritz.gellner'), # fb works
-    ('Michael Marasco', 'michaelamarasco'), 
-    ('Todd Warren', 'todd.warren.seattle'),
-    ('Rich Gordon', 'richgor'),
-    ('Chris Riesbeck', 'chris.riesbeck'),
-    ('Steve Olechowski', 'steve.olechowski'), # fb works, twitter works
-    ('Megan Everett', 'megan.everett'),
-    ('Mitra Veeramasuneni', 'vlmitra'), # fb works, twitter works
-    ('Ryan Mcafee', 'mcafeeryan'),
-    ('Ben Rafshoon', 'benrafshoon') # fb works, twitter works
-]
-
-# python manage.py resolve "Steve Olechowski" --city="Chicago" --state="IL"
-# python manage.py resolve "Mitra Veeramasuneni"
-# python manage.py resolve "Ben Rafshoon"
-# python manage.py resolve "Rich Gordon" --city="Evanston" --state="IL"
-# python manage.py resolve "Daniel Thirman" --city="Wilmette" --state="IL"
-# python manage.py resolve "Moritz Gellner"
-
-# python manage.py facebook vlmitra
-# python manage.py facebook benrafshoon
-# python manage.py facebook richgor
-# python manage.py facebook dthirman
-# python manage.py facebook moritz.gellner
-
-# python manage.py facebook michaelamarasco
-# python manage.py facebook todd.warren.seattle
-
-# python manage.py twitter steveobd
-# python manage.py twitter vlmitra
-# python manage.py twitter captainshoon
-# python manage.py twitter richgor
-
 @manager.command
-def facebook(scrape_type, username):
+def facebook(scrape_type, graph_name):
     from socialscraper.facebook import FacebookScraper
     pp = pprint.PrettyPrinter(indent=4)
     facebook_scraper = FacebookScraper()
@@ -83,6 +48,10 @@ def facebook(scrape_type, username):
 
     def pages_liked(username):
         for item in facebook_scraper.graph_search(username, "pages-liked"):
+            print item
+
+    def likers(pagename):
+        for item in facebook_scraper.graph_search(pagename, "likers"):
             print item
 
     def about(username):
@@ -94,11 +63,13 @@ def facebook(scrape_type, username):
         timeline.search(facebook_scraper.browser, facebook_scraper.cur_user, username)
 
     if scrape_type == "about":
-        about(username)
+        about(graph_name)
     elif scrape_type == "pages":
-        pages_liked(username)
+        pages_liked(graph_name)
+    elif scrape_type == "likers":
+        likers(graph_name)
     elif scrape_type == "timeline":
-        timeline(username)
+        timeline(graph_name)
 
 @manager.command
 def twitter(username):

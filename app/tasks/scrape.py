@@ -19,7 +19,7 @@ twitter_scraper.add_user(username=os.getenv("TWITTER_USERNAME"),password=os.gete
 def scrape_followers(username):
     twitter_scraper.add_user(username=os.getenv("TWITTER_USERNAME"),password=os.getenv('TWITTER_PASSWORD'))
     subtasks = []
-    for follower in twitter_scraper.get_followers('aljohri'):
+    for follower in twitter_scraper.get_followers(username):
         #print follower.screen_name
         sig = celery.send_task('scrape.twitter.follower', args=[follower.screen_name], queue='celery')
         subtasks.append(sig)
