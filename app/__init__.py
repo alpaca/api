@@ -4,8 +4,6 @@ from flask import Flask
 from . import settings
 from . import environment
 
-# Allow importing libraries from lib folder
-
 app = Flask(__name__)
 app.config.from_object(settings.config)
 

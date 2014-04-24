@@ -16,7 +16,6 @@ def sample():
 	print thing
 	return str(thing.get())
 
-
 @app.route('/scrape')
 def scrape():
 	for page in range(100):

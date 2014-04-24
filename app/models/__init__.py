@@ -21,15 +21,14 @@ FacebookFamily = type('FacebookFamily', (db.Model, BaseModel), get_model_propert
 FacebookLocation = type('FacebookLocation', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookLocation))
 FacebookFriend = type('FacebookFriend', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookFriend))
 FacebookPage = type('FacebookPage', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookPage))
-FacebookCategoriesPages = type('FacebookCategoriesPages', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookCategoriesPages))
 FacebookStatus = type('FacebookStatus', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookStatus))
 FacebookPagesUsers = type('FacebookPagesUsers', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookPagesUsers))
 
 TwitterUser = type('TwitterUser', (twitter.models.TwitterUser, db.Model, BaseModel), get_model_properties(twitter.models.TwitterUser))
 TwitterTweet = type('TwitterTweet', (twitter.models.TwitterTweet, db.Model, BaseModel), get_model_properties(twitter.models.TwitterTweet))
 
-FacebookUser.pages = db.relationship('FacebookUser', secondary=FacebookPagesUsers.__table__)
-FacebookPage.users = db.relationship('FacebookPage', secondary=FacebookPagesUsers.__table__)
+FacebookUser.pages = db.relationship('FacebookPage', secondary=FacebookPagesUsers.__table__)
+FacebookPage.users = db.relationship('FacebookUser', secondary=FacebookPagesUsers.__table__)
 
 # http://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-viii-followers-contacts-and-friends
 FacebookUser.friends = db.relationship('FacebookUser', 
@@ -45,6 +44,4 @@ FacebookUser.friends = db.relationship('FacebookUser',
 
 __all__ = []
 
-from app.models import *
-
-# foreign keys, do them
+from . import *

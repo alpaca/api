@@ -18,9 +18,6 @@ import os, pprint
 
 from app import app
 from app.models import db
-from app.tasks import celery
-from app.controllers import api
-
 
 from sqlalchemy.exc import IntegrityError
 

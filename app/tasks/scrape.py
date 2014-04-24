@@ -9,13 +9,27 @@ from app.models import FacebookUser, FacebookFamily, FacebookLocation, FacebookF
 from socialscraper import twitter, facebook
 from sqlalchemy.exc import IntegrityError
 
-# ----------------------------------------------------- #
-#                        Twitter                        #
-# ----------------------------------------------------- #
+from celery.signals import worker_init
+
 twitter_scraper = twitter.TwitterScraper()
 twitter_username = os.getenv("TWITTER_USERNAME")
 twitter_password = os.getenv('TWITTER_PASSWORD')
-twitter_scraper.add_user(username=twitter_username,password=twitter_password)
+if twitter_username and twitter_password:
+    twitter_scraper.add_user(username=twitter_username,password=twitter_password)
+
+facebook_scraper = facebook.FacebookScraper()
+facebook_username = os.getenv("FACEBOOK_USERNAME")
+facebook_password = os.getenv("FACEBOOK_PASSWORD")
+if facebook_username and facebook_password:
+    facebook_scraper.add_user(email=facebook_username, password=facebook_password)
+
+@worker_init.connect
+def worker_init(*args, **kwargs):
+    facebook_scraper.login()
+
+# ----------------------------------------------------- #
+#                        Twitter                        #
+# ----------------------------------------------------- #
 
 # @celery.task(name='scrape.twitter.followers')
 # def scrape_followers(username):
@@ -59,12 +73,6 @@ twitter_scraper.add_user(username=twitter_username,password=twitter_password)
 #                        Facebook                        #
 # ------------------------------------------------------ #
 
-facebook_scraper = facebook.FacebookScraper()
-facebook_username = os.getenv("FACEBOOK_USERNAME")
-facebook_password = os.getenv("FACEBOOK_PASSWORD")
-facebook_scraper.add_user(email=facebook_username, password=facebook_password)
-facebook_scraper.login()
-
 @celery.task(name='scrape.facebook.fan')
 def scrape_fan(username):
     uid = facebook_scraper.get_graph_id(username)
@@ -95,11 +103,14 @@ def scrape_fan_about(username,uid):
 
     return True
 
+from flask import current_app
+
 import pdb
 
 @celery.task(name='scrape.facebook.fan.likes')
 def scrape_fan_likes(username,uid):
     for result in facebook_scraper.graph_search(username, "pages-liked", graph_id=uid):
+        # current_app.logger.info("I have the application context")
         page = FacebookPage(
             page_id=result.page_id,
             username=result.username,
@@ -107,7 +118,6 @@ def scrape_fan_likes(username,uid):
             name=result.name,
             users=[FacebookUser.query.get(uid)]
         )
-        pdb.set_trace()
         db.session.merge(page)
         db.session.commit()
     return True
