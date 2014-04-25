@@ -73,9 +73,28 @@ def worker_init(*args, **kwargs):
 #                        Facebook                        #
 # ------------------------------------------------------ #
 
+@celery.task(name='scrape.facebook.page')
+def scrape_page(username):
+    page_id = facebook_scraper.get_graph_id(username)
+    
+    if not FacebookPage.query.get(page_id):
+        page = FacebookPage(page_id=page_id, username=username)
+        db.session.add(page)
+        db.session.commit()
+
+    # celery.send_task('scrape.facebook.page.about', args=[username,uid], queue='celery')
+    celery.send_task('scrape.facebook.page.likes', args=[username,page_id], queue='celery')
+    # celery.send_task('scrape.facebook.fan.timeline', args=[username], queue='celery')
+
 @celery.task(name='scrape.facebook.fan')
 def scrape_fan(username):
     uid = facebook_scraper.get_graph_id(username)
+    
+    if not FacebookUser.query.get(uid):
+        user = FacebookUser(uid=uid, username=username)
+        db.session.add(user)
+        db.session.commit()
+
     celery.send_task('scrape.facebook.fan.about', args=[username,uid], queue='celery')
     celery.send_task('scrape.facebook.fan.likes', args=[username,uid], queue='celery')
     # celery.send_task('scrape.facebook.fan.timeline', args=[username], queue='celery')
@@ -100,7 +119,6 @@ def scrape_fan_about(username,uid):
 
     db.session.merge(user)
     db.session.commit()
-
     return True
 
 from flask import current_app
@@ -110,13 +128,26 @@ import pdb
 @celery.task(name='scrape.facebook.fan.likes')
 def scrape_fan_likes(username,uid):
     for result in facebook_scraper.graph_search(username, "pages-liked", graph_id=uid):
-        # current_app.logger.info("I have the application context")
         page = FacebookPage(
             page_id=result.page_id,
             username=result.username,
             url=result.url,
             name=result.name,
             users=[FacebookUser.query.get(uid)]
+        )
+        db.session.merge(page)
+        db.session.commit()
+    return True
+
+@celery.task(name='scrape.facebook.page.likes')
+def scrape_page_likes(username,page_id):
+    for result in facebook_scraper.graph_search(username, "likers", graph_id=page_id):
+        page = FacebookUser(
+            uid=result.uid,
+            username=result.username,
+            # profile_url=result.url,
+            name=result.name,
+            pages=[FacebookPage.query.get(page_id)]
         )
         db.session.merge(page)
         db.session.commit()
