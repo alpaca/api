@@ -17,11 +17,11 @@ from ..utils import get_model_properties
 from socialscraper import facebook, twitter
 
 FacebookUser = type('FacebookUser', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookUser))
-FacebookFamily = type('FacebookFamily', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookFamily))
-FacebookLocation = type('FacebookLocation', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookLocation))
-FacebookFriend = type('FacebookFriend', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookFriend))
+# FacebookFamily = type('FacebookFamily', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookFamily))
+# FacebookLocation = type('FacebookLocation', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookLocation))
+# FacebookFriend = type('FacebookFriend', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookFriend))
 FacebookPage = type('FacebookPage', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookPage))
-FacebookStatus = type('FacebookStatus', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookStatus))
+# FacebookStatus = type('FacebookStatus', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookStatus))
 FacebookPagesUsers = type('FacebookPagesUsers', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookPagesUsers))
 
 TwitterUser = type('TwitterUser', (twitter.models.TwitterUser, db.Model, BaseModel), get_model_properties(twitter.models.TwitterUser))
@@ -31,17 +31,18 @@ FacebookUser.pages = db.relationship('FacebookPage', secondary=FacebookPagesUser
 FacebookPage.users = db.relationship('FacebookUser', secondary=FacebookPagesUsers.__table__)
 
 # http://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-viii-followers-contacts-and-friends
-FacebookUser.friends = db.relationship('FacebookUser', 
-	secondary = FacebookFriend.__table__, 
-	primaryjoin = (FacebookFriend.__table__.c.uid1 == FacebookUser.uid),
-	secondaryjoin = (FacebookFriend.__table__.c.uid2 == FacebookUser.uid),
-	backref = db.backref('facebook_friends', lazy = 'dynamic'), 
-	lazy = 'dynamic'
-)
+# FacebookUser.friends = db.relationship('FacebookUser', 
+# 	secondary = FacebookFriend.__table__, 
+# 	primaryjoin = (FacebookFriend.__table__.c.uid1 == FacebookUser.uid),
+# 	secondaryjoin = (FacebookFriend.__table__.c.uid2 == FacebookUser.uid),
+# 	backref = db.backref('facebook_friends', lazy = 'dynamic'), 
+# 	lazy = 'dynamic'
+# )
 
 # FacebookUser.locations = db.relationship('FacebookLocation') uid -> gid
 # FacebookPage.locations = db.relationship('FacebookLocation') page_id -> gid
 
-__all__ = ['FacebookUser', 'FacebookFamily', 'FacebookLocation', 'FacebookFriend', 'FacebookPage', 'FacebookStatus', 'FacebookPagesUsers', 'TwitterUser', 'TwitterTweet']
+# __all__ = ['FacebookUser', 'FacebookFamily', 'FacebookLocation', 'FacebookFriend', 'FacebookPage', 'FacebookStatus', 'FacebookPagesUsers', 'TwitterUser', 'TwitterTweet']
+__all__ = ['FacebookPage', 'FacebookUser', 'FacebookPagesUsers']
 
 from . import *

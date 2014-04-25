@@ -157,6 +157,11 @@ def scrape_db_about(username):
     for result in FacebookUser.query.filter(FacebookUser.pages.any(username=username)):
         celery.send_task('scrape.facebook.fan.about', args=[result.username,result.uid], queue='celery')
 
+@celery.task(name='scrape.facebook.db.likes')
+def scrape_db_likes(username):
+    for result in FacebookUser.query.filter(FacebookUser.pages.any(username=username)):
+        celery.send_task('scrape.facebook.fan.likes', args=[result.username,result.uid], queue='celery')
+
 # @celery.task(name='scrape.facebook.fan.feed')
 # @celery.task(name='scrape.facebook.fan.timeline')
 # def scrape_fan_feed(username):
