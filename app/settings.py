@@ -7,7 +7,7 @@ class Config(object):
     DEBUG = False
     TESTING = False
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'postgresql+psycopg2://postgres:postgres@localhost:5432/alpaca_api_development')
-    SQLALCHEMY_ECHO = True
+    SQLALCHEMY_ECHO = False
     BROKER_URL = os.getenv('BROKER_URL', 'amqp://')
     CELERY_RESULT_BACKEND = 'amqp'
     CELERY_TASK_SERIALIZER = 'json'

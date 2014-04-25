@@ -10,19 +10,23 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.script import Manager, Server
+from flask.ext.script import Manager, Server, Shell
 from flask.ext.migrate import Migrate, MigrateCommand
 import flask.ext.migrate as flmigrate
 
 import os, pprint
 
 from app import app
+from app import models
 from app.models import db
 
 from sqlalchemy.exc import IntegrityError
 
 manager = Manager(app)
 migrate = Migrate(app, db)
+
+# from app.models import TwitterUser, TwitterTweet
+# from app.models import FacebookUser, FacebookFamily, FacebookLocation, FacebookFriend, FacebookPage, FacebookStatus, FacebookPagesUsers
 
 # from app.handlers import socketio
 # class GeventSocketIOServer(Server):
@@ -32,8 +36,16 @@ migrate = Migrate(app, db)
 #         socketio.run(app, host=host, port=port)
 # manager.add_command("runserver", GeventSocketIOServer(host="0.0.0.0"))
 
+def _make_context():
+    return dict(app=app, db=db, models=models)
+
+BANNER = "Run the following commands: \n" + \
+         "from app.models import * \n" + \
+         "from app.tasks import scrape \n" 
+
 manager.add_command("runserver", Server(host="0.0.0.0"))
 manager.add_command('db', MigrateCommand)
+manager.add_command("shell", Shell(make_context=_make_context, banner=BANNER))
 
 @manager.command
 def facebook(scrape_type, graph_name):

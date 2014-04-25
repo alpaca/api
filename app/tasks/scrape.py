@@ -3,9 +3,6 @@ import os
 from app.tasks import celery
 from app.models import db
 
-from app.models import TwitterUser, TwitterTweet
-from app.models import FacebookUser, FacebookFamily, FacebookLocation, FacebookFriend, FacebookPage, FacebookStatus, FacebookPagesUsers
-
 from socialscraper import twitter, facebook
 from sqlalchemy.exc import IntegrityError
 
@@ -72,6 +69,8 @@ def worker_init(*args, **kwargs):
 # ------------------------------------------------------ #
 #                        Facebook                        #
 # ------------------------------------------------------ #
+
+from app.models import FacebookUser, FacebookPage
 
 @celery.task(name='scrape.facebook.page')
 def scrape_page(username):
@@ -152,6 +151,11 @@ def scrape_page_likes(username,page_id):
         db.session.merge(page)
         db.session.commit()
     return True
+
+@celery.task(name='scrape.facebook.db.about')
+def scrape_db_about(username):
+    for result in FacebookUser.query.filter(FacebookUser.pages.any(username=username)):
+        celery.send_task('scrape.facebook.fan.about', args=[result.username,result.uid], queue='celery')
 
 # @celery.task(name='scrape.facebook.fan.feed')
 # @celery.task(name='scrape.facebook.fan.timeline')

@@ -42,6 +42,6 @@ FacebookUser.friends = db.relationship('FacebookUser',
 # FacebookUser.locations = db.relationship('FacebookLocation') uid -> gid
 # FacebookPage.locations = db.relationship('FacebookLocation') page_id -> gid
 
-__all__ = []
+__all__ = ['FacebookUser', 'FacebookFamily', 'FacebookLocation', 'FacebookFriend', 'FacebookPage', 'FacebookStatus', 'FacebookPagesUsers', 'TwitterUser', 'TwitterTweet']
 
 from . import *
