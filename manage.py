@@ -41,7 +41,11 @@ def _make_context():
 
 BANNER = "Run the following commands: \n" + \
          "from app.models import * \n" + \
-         "from app.tasks import scrape \n" 
+         "from app.tasks import scrape \n\n" + \
+         "# scrape schneider's followers into database \n" + \
+         "scrape.scrape_page.delay('schneiderforcongress') \n" + \
+         "# scrape information about schneider's followers from database \n" + \
+         "scrape.scrape_db_about.delay('schneiderforcongress') \n"
 
 manager.add_command("runserver", Server(host="0.0.0.0"))
 manager.add_command('db', MigrateCommand)
