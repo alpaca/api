@@ -79,7 +79,6 @@ def schneider():
         )
         db.session.merge(user)
         db.session.commit()
-        pdb.set_trace()
 
 
 @manager.command

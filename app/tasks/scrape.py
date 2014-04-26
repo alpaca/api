@@ -25,6 +25,7 @@ serialized_facebook_scraper = None
 
 @worker_init.connect
 def worker_init(*args, **kwargs):
+    global serialized_browser
     facebook_scraper.login()
     serialized_browser = pickle.dumps(facebook_scraper.browser)
     # serialized_facebook_scraper = pickle.dumps(facebook_scraper)
@@ -117,7 +118,10 @@ def scrape_fan_about(username,uid):
     facebook_scraper = facebook.FacebookScraper(pickled_session=serialized_browser)
     facebook_scraper.add_user(email=facebook_username, password=facebook_password)
     facebook_scraper.pick_random_user()
-    result = facebook_scraper.get_about(username, graph_id=uid)
+    result = facebook_scraper.get_about(username)
+    # result = facebook_scraper.get_about(username, graph_id=uid)
+
+    print result
 
     # Find better way to do this!!! Mad ugly to repeat this code.
     user = FacebookUser(
