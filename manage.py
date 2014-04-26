@@ -86,11 +86,14 @@ def facebook(scrape_type, graph_name):
     from socialscraper.facebook import FacebookScraper
     pp = pprint.PrettyPrinter(indent=4)
     facebook_scraper = FacebookScraper()
-    facebook_scraper.add_user(email=os.getenv("FACEBOOK_EMAIL"), password=os.getenv("FACEBOOK_PASSWORD"))
-    facebook_scraper.login()
+    # facebook_scraper.add_user(email=os.getenv("FACEBOOK_EMAIL"), password=os.getenv("FACEBOOK_PASSWORD"))
+    # facebook_scraper.login()
 
     def pages_liked(username):
-        for item in facebook_scraper.graph_search(username, "pages-liked"):
+        print "pages liked."
+        #for item in facebook_scraper.graph_search(username, "pages-liked"):
+        #    print item
+        for item in facebook_scraper.get_pages_liked_by(username):
             print item
 
     def likers(pagename):

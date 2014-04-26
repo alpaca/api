@@ -205,12 +205,24 @@ def scrape_db_about(username):
 def scrape_db_likes(username):
     # facebook_scraper = pickle.loads(serialized_facebook_scraper)
     facebook_scraper = facebook.FacebookScraper(pickled_session=serialized_browser)
-    facebook_scraper.add_user(email=facebook_username, password=facebook_password)
-    facebook_scraper.pick_random_user()
-    for result in FacebookUser.query.filter(FacebookUser.pages.any(username=username)):
-        celery.send_task('scrape.facebook.fan.likes', args=[result.username,result.uid], queue='celery')
+    # facebook_scraper.add_user(email=facebook_username, password=facebook_password)
+    # TODO: make sure we're logged OUT
 
-# @celery.task(name='scrape.facebook.fan.feed')
-# @celery.task(name='scrape.facebook.fan.timeline')
-# def scrape_fan_feed(username):
-#     pass # TODO: need to implement generator in package side (Al)
+    for result in FacebookUser.query.filter(FacebookUser.pages.any(username=username)):
+        celery.send_task('scrape.facebook.db.likes_nograph', args=[result.username], queue='celery')
+
+@celery.task(name='scrape.facebook.db.likes_nograph')
+def scrape_likes_nograph(username):
+    facebook_scraper.logout()
+    for item in facebook_scraper.get_pages_liked_by(username):
+        name = item['name']
+        link = item['link']
+        page = FacebookPage(
+            page_id=hash(name),
+            username=name,
+            url=link,
+            name=name
+        )
+        db.session.merge(page)
+        db.session.commit()
+    return
