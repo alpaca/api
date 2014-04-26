@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import os
+import os, pickle
 from app.tasks import celery
 from app.models import db
 
@@ -20,9 +20,14 @@ facebook_password = os.getenv("FACEBOOK_PASSWORD")
 if facebook_username and facebook_password:
     facebook_scraper.add_user(email=facebook_username, password=facebook_password)
 
+serialized_browser = None
+serialized_facebook_scraper = None
+
 @worker_init.connect
 def worker_init(*args, **kwargs):
     facebook_scraper.login()
+    serialized_browser = pickle.dumps(facebook_scraper.browser)
+    # serialized_facebook_scraper = pickle.dumps(facebook_scraper)
 
 # ----------------------------------------------------- #
 #                        Twitter                        #
@@ -70,10 +75,14 @@ def worker_init(*args, **kwargs):
 #                        Facebook                        #
 # ------------------------------------------------------ #
 
-from app.models import FacebookUser, FacebookPage
+from ..models import FacebookUser, FacebookPage
 
 @celery.task(name='scrape.facebook.page')
 def scrape_page(username):
+    # facebook_scraper = pickle.loads(serialized_facebook_scraper)
+    facebook_scraper = facebook.FacebookScraper(pickled_session=serialized_browser)
+    facebook_scraper.add_user(email=facebook_username, password=facebook_password)
+    facebook_scraper.pick_random_user()
     page_id = facebook_scraper.get_graph_id(username)
     
     if not FacebookPage.query.get(page_id):
@@ -87,6 +96,10 @@ def scrape_page(username):
 
 @celery.task(name='scrape.facebook.fan')
 def scrape_fan(username):
+    # facebook_scraper = pickle.loads(serialized_facebook_scraper)
+    facebook_scraper = facebook.FacebookScraper(pickled_session=serialized_browser)
+    facebook_scraper.add_user(email=facebook_username, password=facebook_password)
+    facebook_scraper.pick_random_user()
     uid = facebook_scraper.get_graph_id(username)
     
     if not FacebookUser.query.get(uid):
@@ -100,6 +113,10 @@ def scrape_fan(username):
 
 @celery.task(name='scrape.facebook.fan.about')
 def scrape_fan_about(username,uid):
+    # facebook_scraper = pickle.loads(serialized_facebook_scraper)
+    facebook_scraper = facebook.FacebookScraper(pickled_session=serialized_browser)
+    facebook_scraper.add_user(email=facebook_username, password=facebook_password)
+    facebook_scraper.pick_random_user()
     result = facebook_scraper.get_about(username, graph_id=uid)
 
     # Find better way to do this!!! Mad ugly to repeat this code.
@@ -118,7 +135,7 @@ def scrape_fan_about(username,uid):
 
     db.session.merge(user)
     db.session.commit()
-    return True
+    return result
 
 from flask import current_app
 
@@ -126,39 +143,66 @@ import pdb
 
 @celery.task(name='scrape.facebook.fan.likes')
 def scrape_fan_likes(username,uid):
+    # facebook_scraper = pickle.loads(serialized_facebook_scraper)
+    facebook_scraper = facebook.FacebookScraper(pickled_session=serialized_browser)
+    facebook_scraper.add_user(email=facebook_username, password=facebook_password)
+    facebook_scraper.pick_random_user()
+    pages = []
+    results = []
     for result in facebook_scraper.graph_search(username, "pages-liked", graph_id=uid):
+        print result.page_id
+        print result.username
         page = FacebookPage(
             page_id=result.page_id,
             username=result.username,
             url=result.url,
-            name=result.name,
-            users=[FacebookUser.query.get(uid)]
+            name=result.name
         )
+        page.users.append(FacebookUser.query.get(uid))
         db.session.merge(page)
         db.session.commit()
-    return True
+        pages.append(page)
+        results.append(result)
+        print page.username
+    return results
 
 @celery.task(name='scrape.facebook.page.likes')
 def scrape_page_likes(username,page_id):
+    # facebook_scraper = pickle.loads(serialized_facebook_scraper)
+    facebook_scraper = facebook.FacebookScraper(pickled_session=serialized_browser)
+    facebook_scraper.add_user(email=facebook_username, password=facebook_password)
+    facebook_scraper.pick_random_user()
+    users = []
+    results = []
     for result in facebook_scraper.graph_search(username, "likers", graph_id=page_id):
-        page = FacebookUser(
+        user = FacebookUser(
             uid=result.uid,
             username=result.username,
             # profile_url=result.url,
             name=result.name,
-            pages=[FacebookPage.query.get(page_id)]
         )
-        db.session.merge(page)
+        user.pages.append(FacebookPage.query.get(page_id))
+        db.session.merge(user)
         db.session.commit()
-    return True
+        users.append(user)
+        results.append(result)
+    return results
 
 @celery.task(name='scrape.facebook.db.about')
 def scrape_db_about(username):
+    # facebook_scraper = pickle.loads(serialized_facebook_scraper)
+    facebook_scraper = facebook.FacebookScraper(pickled_session=serialized_browser)
+    facebook_scraper.add_user(email=facebook_username, password=facebook_password)
+    facebook_scraper.pick_random_user()
     for result in FacebookUser.query.filter(FacebookUser.pages.any(username=username)):
         celery.send_task('scrape.facebook.fan.about', args=[result.username,result.uid], queue='celery')
 
 @celery.task(name='scrape.facebook.db.likes')
 def scrape_db_likes(username):
+    # facebook_scraper = pickle.loads(serialized_facebook_scraper)
+    facebook_scraper = facebook.FacebookScraper(pickled_session=serialized_browser)
+    facebook_scraper.add_user(email=facebook_username, password=facebook_password)
+    facebook_scraper.pick_random_user()
     for result in FacebookUser.query.filter(FacebookUser.pages.any(username=username)):
         celery.send_task('scrape.facebook.fan.likes', args=[result.username,result.uid], queue='celery')
 
