@@ -14,7 +14,7 @@ from flask.ext.script import Manager, Server, Shell
 from flask.ext.migrate import Migrate, MigrateCommand
 import flask.ext.migrate as flmigrate
 
-import os, pprint
+import os, pprint, pdb
 
 from app import app
 from app import models
@@ -24,6 +24,8 @@ from sqlalchemy.exc import IntegrityError
 
 manager = Manager(app)
 migrate = Migrate(app, db)
+
+from app.models import FacebookUser, FacebookPage
 
 # from app.models import TwitterUser, TwitterTweet
 # from app.models import FacebookUser, FacebookFamily, FacebookLocation, FacebookFriend, FacebookPage, FacebookStatus, FacebookPagesUsers
@@ -52,6 +54,33 @@ BANNER = "Run the following commands: \n" + \
 manager.add_command("runserver", Server(host="0.0.0.0"))
 manager.add_command('db', MigrateCommand)
 manager.add_command("shell", Shell(make_context=_make_context, banner=BANNER))
+
+@manager.command
+def schneider():
+    from socialscraper.facebook import FacebookScraper
+    pp = pprint.PrettyPrinter(indent=4)
+    facebook_scraper = FacebookScraper()
+    facebook_scraper.add_user(email=os.getenv("FACEBOOK_EMAIL"), password=os.getenv("FACEBOOK_PASSWORD"))
+    facebook_scraper.login()
+    for info in FacebookUser.query.filter(FacebookUser.pages.any(username='schneiderforcongress')):
+        print info.username, info.uid
+        result = facebook_scraper.get_about(info.username, graph_id=info.uid)
+        user = FacebookUser(
+            uid=result.uid, 
+            username=result.username, 
+            email=result.email, 
+            birthday=result.birthday, 
+            sex=result.sex, 
+            college=result.college, 
+            employer=result.employer,
+            highschool=result.highschool,
+            currentcity=result.currentcity,
+            hometown=result.hometown
+        )
+        db.session.merge(user)
+        db.session.commit()
+        pdb.set_trace()
+
 
 @manager.command
 def facebook(scrape_type, graph_name):
