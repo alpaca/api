@@ -49,7 +49,8 @@ BANNER = "Run the following commands: \n" + \
          "# for celery use .delay at the end of commands \n" + \
          "scrape.scrape_page.delay('schneiderforcongress') \n" + \
          "scrape.scrape_db_about.delay('schneiderforcongress') \n" + \
-         "scrape.scrape_db_likes.delay('schneiderforcongress') \n"
+         "scrape.scrape_db_likes.delay('schneiderforcongress') \n" + \
+         "scrape.categories.delay() \n"
 
 manager.add_command("runserver", Server(host="0.0.0.0"))
 manager.add_command('db', MigrateCommand)
