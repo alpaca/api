@@ -26,8 +26,8 @@ serialized_facebook_scraper = None
 @worker_init.connect
 def worker_init(*args, **kwargs):
     global serialized_browser
-    facebook_scraper.login()
-    serialized_browser = pickle.dumps(facebook_scraper.browser)
+    # facebook_scraper.login()
+    # serialized_browser = pickle.dumps(facebook_scraper.browser)
     # serialized_facebook_scraper = pickle.dumps(facebook_scraper)
 
 # ----------------------------------------------------- #
