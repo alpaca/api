@@ -208,15 +208,21 @@ def scrape_db_likes(username):
     facebook_scraper.logout()
     # facebook_scraper.add_user(email=facebook_username, password=facebook_password)
 
-    for result in FacebookUser.query.filter(FacebookUser.pages.any(username=username)):
-        username = result.username
-        celery.send_task('scrape.facebook.db.likes_nograph', args=[username], queue='celery')
+    for result in FacebookUser.query.all():
+        usr = result.username
+        try:
+            # scrape_likes_nograph(usr)
+            celery.send_task('scrape.facebook.db.likes_nograph', args=[usr], queue='celery')
+        except IndexError:
+            print "IndexError (probably no likes)"
+            continue
+        # celery.send_task('scrape.facebook.db.likes_nograph', args=[usr], queue='celery')
     return
 
 @celery.task(name='scrape.facebook.db.likes_nograph')
 def scrape_likes_nograph(username):
-    for item in facebook_scraper.get_pages_liked_by(username):
-        try:
+    try:
+        for item in facebook_scraper.get_pages_liked_by(username):
             name = item['name']
             link = item['link']
             page_username = item['username']
@@ -239,6 +245,7 @@ def scrape_likes_nograph(username):
             page.users.append(user)
             db.session.merge(page)
             db.session.commit()
-        except ValueError:
-            continue
+    except ValueError, IndexError:
+        print "[Caught a recognized exception (IndexError or ValueError.) It's probably fine.]"
+        pass
     return
