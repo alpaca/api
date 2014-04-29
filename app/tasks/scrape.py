@@ -208,7 +208,7 @@ def scrape_db_likes(username):
     facebook_scraper.logout()
     # facebook_scraper.add_user(email=facebook_username, password=facebook_password)
 
-    for result in FacebookUser.query.all():
+    for result in FacebookUser.query:
         usr = result.username
         try:
             # scrape_likes_nograph(usr)
@@ -232,7 +232,10 @@ def scrape_likes_nograph(username):
                 page_id=page_id,
                 username=page_username,
                 url=link,
-                name=name
+                name=name,
+                hometown=item['hometown'],
+                talking_about_count=item['talking_about_count'],
+                num_likes=item['num_likes']
             )
 
             uid = facebook_scraper.get_graph_id(username)
