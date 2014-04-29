@@ -210,12 +210,8 @@ def scrape_db_likes(username):
 
     for result in FacebookUser.query:
         usr = result.username
-        try:
-            # scrape_likes_nograph(usr)
-            celery.send_task('scrape.facebook.db.likes_nograph', args=[usr], queue='celery')
-        except IndexError:
-            print "IndexError (probably no likes)"
-            continue
+        scrape_likes_nograph(usr)
+        # celery.send_task('scrape.facebook.db.likes_nograph', args=[usr], queue='celery')
         # celery.send_task('scrape.facebook.db.likes_nograph', args=[usr], queue='celery')
     return
 
