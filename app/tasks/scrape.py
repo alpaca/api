@@ -1,12 +1,21 @@
 # -*- coding: utf-8 -*-
-import os, pickle
+
+from __future__ import division
+
+import os, sys, pickle
 from app.tasks import celery
 from app.models import db
+
+from time import time
+from datetime import datetime
+from urlparse import urlparse, parse_qs
+from facebook import GraphAPI, GraphAPIError
 
 from socialscraper import twitter, facebook
 from sqlalchemy.exc import IntegrityError
 
 from celery.signals import worker_init
+from celery import group, chord
 
 from flask import current_app
 
@@ -326,3 +335,90 @@ def categories_request(page_id, graph_url):
 # data.get('cover')
 # data.get('were_here_count')
 # data.get('is_published')
+
+
+####################################################################################################
+
+graph = GraphAPI(os.getenv('FACEBOOK_USER_TOKEN'))
+
+NORMAL_KEYS = ['id', 'first_name', 'gender', 'last_name', 'link', 'locale', 'name', 'updated_time', 'username']
+
+@celery.task()
+def about_callback(results):
+    logger.info(results)
+    logger.info(sum(results))
+    logger.info(len(results))
+    return sum(results)/len(results)
+
+@celery.task()
+def about():
+    subtasks = []
+    users = FacebookUser.query #.filter_by(sex=None)
+    for u in users:
+        subtasks.append(about_request.s(u.username))
+    logger.info("Created subtasks")
+    # job = group(subtasks).apply_async()
+    job = chord(subtasks)(about_callback.s()).get()
+    return job
+
+@celery.task()
+def about_request(username):
+    # logger.info(NORMAL_KEYS)
+
+    try:
+        profile = graph.get_object(username)
+    except GraphAPIError:
+        return False
+
+    uid = profile.get('id')
+    user = FacebookUser.query.get(uid)
+
+    user.data = json.dumps(profile)
+
+    # logger.info(profile)
+    for key in profile.keys(): 
+        # logger.info(key)
+        if key not in NORMAL_KEYS:
+            user.misc = 'True'
+            return True
+
+    user.misc = 'False'
+
+    db.session.merge(user)
+    db.session.commit()
+
+    return False
+
+@celery.task()
+def feed_request(username):
+    def get_previous(previous_url):
+        previous_url_parameters = parse_qs(urlparse(previous_url).query)
+        return int(previous_url_parameters['since'][0])
+
+    def get_next(next_url):
+        next_url_parameters = parse_qs(urlparse(next_url).query)
+        return int(next_url_parameters['until'][0])
+
+    # ryan.berthold
+    # user = "1cupcakelady" #sys.argv[1]
+
+    graph = GraphAPI(os.getenv('FACEBOOK_APP_TOKEN'))
+    profile = graph.get_object(username)
+
+    print profile
+
+    until = int(time())
+    while True:
+
+        print "Getting Feed Until: " + datetime.utcfromtimestamp(until).strftime('%Y-%m-%d %H:%M:%S')
+        profile = graph.get_object(username + "/feed", until=str(until))
+        if profile['data'] == []:
+            print "End of Results"
+            break
+        since = get_previous(profile['paging']['previous'])
+        until = get_next(profile['paging']['next'])
+
+        print profile['data']
+
+        for item in profile['data']:
+            print item.get('type') + ": " + item.get('story', '') + item.get('message', '')

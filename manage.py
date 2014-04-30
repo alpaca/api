@@ -44,13 +44,16 @@ def _make_context():
 BANNER = "Run the following commands: \n" + \
          "from app.models import * \n" + \
          "from app.tasks import scrape \n\n" + \
-         "# if you want to scrape within this shell and not in celery \n" + \
-         "scrape.facebook_scraper.login() \n" + \
-         "# for celery use .delay at the end of commands \n" + \
-         "scrape.scrape_page.delay('schneiderforcongress') \n" + \
-         "scrape.scrape_db_about.delay('schneiderforcongress') \n" + \
-         "scrape.scrape_db_likes.delay('schneiderforcongress') \n" + \
+         "scrape.about.delay() \n" + \
          "scrape.categories.delay() \n"
+
+         # "# if you want to scrape within this shell and not in celery \n" + \
+         # "scrape.facebook_scraper.login() \n" + \
+         # "# for celery use .delay at the end of commands \n" + \
+         # "scrape.scrape_page.delay('schneiderforcongress') \n" + \
+         # "scrape.scrape_db_about.delay('schneiderforcongress') \n" + \
+         # "scrape.scrape_db_likes.delay('schneiderforcongress') \n" + \
+
 
 manager.add_command("runserver", Server(host="0.0.0.0"))
 manager.add_command('db', MigrateCommand)
