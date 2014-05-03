@@ -195,6 +195,7 @@ def import_csv(path,pkey_colname):
                     db.session.rollback()
     return
 
+@manager.command
 def parse_schneider():
     from socialscraper.facebook.public import parse_url
     with open('schneider.txt', 'rb') as f:
@@ -205,6 +206,31 @@ def parse_schneider():
             print string
             with open('schneider2.txt', 'a') as f2:
                 f2.write(string.encode('utf-8'))
+
+@manager.command
+def parse_schneider2():
+    from socialscraper.facebook import FacebookScraper
+    from socialscraper.base import ScrapingError
+    from app.models import db, FacebookUser
+    facebook_scraper = FacebookScraper()
+    facebook_scraper.init_api()
+
+    with open('schneider2.txt', 'rb') as f:
+        counter = 0
+        for line in f:
+            # if counter > 100: break
+            url, name, username = eval(line)
+            try:
+                result = facebook_scraper.get_about(username)
+                profile = result[0]
+                user = FacebookUser(uid=profile.get('id'), username=profile.get('username'), name=profile.get('name'), sex=profile.get('gender'))
+                print counter, user.uid, user.username, user.name, user.sex
+                db.session.merge(user)
+                db.session.commit()
+            except ScrapingError as e:
+                print "error: ", e
+                continue
+            counter = counter + 1
 
 if __name__ == "__main__":
     manager.run()
