@@ -80,19 +80,49 @@ def get_users(limit=None):
     return map(lambda user: user.username, FacebookUser.query.limit(limit).all())
 
 @celery.task()
+def get_unscraped_users(limit=None):
+    return map(lambda user: user.username, 
+        FacebookUser.query.filter_by(
+            currentcity=None, 
+            hometown=None, 
+            college=None, 
+            highschool=None, 
+            employer=None, 
+            birthday=None
+        ).limit(limit).all())
+
+@celery.task()
 def get_pages(limit=None): 
     return map(lambda page: page.username, FacebookPage.query.limit(limit).all())
 
 # change scraper_type from graphapi to nograph to see different results
 @celery.task()
 def get_about(username):
-    facebook_scraper = facebook.FacebookScraper(pickled_session=serialized_browser, pickled_api=serialized_api, scraper_type="graphapi")
+    facebook_scraper = facebook.FacebookScraper(pickled_session=serialized_browser, pickled_api=serialized_api, scraper_type="nograph")
     facebook_scraper.add_user(email=os.getenv("FACEBOOK_USERNAME"), password=os.getenv("FACEBOOK_PASSWORD"))
     facebook_scraper.pick_random_user()
 
-    about = facebook_scraper.get_about(username)
-    logger.info(about)
-    return about
+    result = facebook_scraper.get_about(username)
+
+    # Find better way to do this!!! Mad ugly to repeat this code.
+    user = FacebookUser(
+        uid=result.uid, 
+        username=result.username, 
+        email=result.email, 
+        birthday=result.birthday, 
+        sex=result.sex, 
+        college=result.college, 
+        employer=result.employer,
+        highschool=result.highschool,
+        currentcity=result.currentcity,
+        hometown=result.hometown
+    )
+
+    db.session.merge(user)
+    db.session.commit()
+
+    logger.info(result)
+    return result
 
 @celery.task()
 def dmap(it, callback):

@@ -10,3 +10,7 @@ is_user_public_list = map(lambda task: task.result[1] if task.status == "SUCCESS
 results = map(lambda task: task.result[0] if task.status == "SUCCESS" and task.result[1] == True else None, res.get())
 results = filter(lambda x: x, results)
 print sum(is_user_public_list)/len(is_user_public_list)
+
+# map(lambda task: task.result if task.status == "SUCCESS", res.get())
+
+# process_list = (scrape.get_unscraped_users.s() | scrape.dmap.s(scrape.get_about.s()))
