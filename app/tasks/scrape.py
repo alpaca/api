@@ -17,9 +17,38 @@ logger = logging.getLogger(__name__)
 # if twitter_username and twitter_password:
 #     twitter_scraper.add_user(username=twitter_username,password=twitter_password)
 
-#     facebook_scraper = facebook.FacebookScraper(pickled_session=serialized_browser)
-#     facebook_scraper.add_user(email=facebook_username, password=facebook_password)
-#     facebook_scraper.pick_random_user()
+
+"""
+
+Need to fix up this code later.
+
+Essentially, the requests session is based on a urllib3 pool which gets full if we 
+try to do thousands of requests from the same session. Thus we're no longer going with
+a module level facebook_scraper.
+
+Instead we instantiate a scraper to login to Facebook and serialize the session object.
+
+We keep this serialized_browser at the module level and instantiate a new FacebookScraper
+in each task that uses the serialized_browser as a parameter.
+
+I should remove code that deals with pickling stuff from socialscraper. Instead unpickle
+here and pass the real objects around in the library.
+
+If I can figure out those urllib pool problems properly I won't have to do any of this stuff.
+
+Or perhaps in the library itself I create a new session object everytime I want to do anything?
+Seems like a lot of overhead because I'd need to deepcopy the logged_in cookiejar each time.
+
+---------------------------------------
+
+The same stuff applies for the GraphAPI although its probably overkill. In order to prevent
+stale user access tokens, I run the init_api method to test whether the access token works.
+
+I only test it in worker_init and assume it'll continue to work throughout the rest of the code.
+
+Although, these tokens are technically for like an hour a pop so that might not be the best assumption.
+
+"""
 
 @worker_init.connect
 def worker_init(*args, **kwargs):
@@ -54,9 +83,13 @@ def get_users(limit=None):
 def get_pages(limit=None): 
     return map(lambda page: page.username, FacebookPage.query.limit(limit).all())
 
+# change scraper_type from graphapi to nograph to see different results
 @celery.task()
 def get_about(username):
-    facebook_scraper = facebook.FacebookScraper(pickled_api=serialized_api)
+    facebook_scraper = facebook.FacebookScraper(pickled_session=serialized_browser, pickled_api=serialized_api, scraper_type="graphapi")
+    facebook_scraper.add_user(email=os.getenv("FACEBOOK_USERNAME"), password=os.getenv("FACEBOOK_PASSWORD"))
+    facebook_scraper.pick_random_user()
+
     about = facebook_scraper.get_about(username)
     logger.info(about)
     return about
