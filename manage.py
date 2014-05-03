@@ -60,32 +60,6 @@ manager.add_command('db', MigrateCommand)
 manager.add_command("shell", Shell(make_context=_make_context, banner=BANNER))
 
 @manager.command
-def schneider():
-    from socialscraper.facebook import FacebookScraper
-    pp = pprint.PrettyPrinter(indent=4)
-    facebook_scraper = FacebookScraper()
-    facebook_scraper.add_user(email=os.getenv("FACEBOOK_EMAIL"), password=os.getenv("FACEBOOK_PASSWORD"))
-    facebook_scraper.login()
-    for info in FacebookUser.query.filter(FacebookUser.pages.any(username='schneiderforcongress')):
-        print info.username, info.uid
-        result = facebook_scraper.get_about(info.username, graph_id=info.uid)
-        user = FacebookUser(
-            uid=result.uid, 
-            username=result.username, 
-            email=result.email, 
-            birthday=result.birthday, 
-            sex=result.sex, 
-            college=result.college, 
-            employer=result.employer,
-            highschool=result.highschool,
-            currentcity=result.currentcity,
-            hometown=result.hometown
-        )
-        db.session.merge(user)
-        db.session.commit()
-
-
-@manager.command
 def facebook(scrape_type, graph_name):
     from socialscraper.facebook import FacebookScraper
     pp = pprint.PrettyPrinter(indent=4)
@@ -231,6 +205,31 @@ def parse_schneider2():
                 print "error: ", e
                 continue
             counter = counter + 1
+
+@manager.command
+def schneider():
+    from socialscraper.facebook import FacebookScraper
+    pp = pprint.PrettyPrinter(indent=4)
+    facebook_scraper = FacebookScraper()
+    facebook_scraper.add_user(email=os.getenv("FACEBOOK_EMAIL"), password=os.getenv("FACEBOOK_PASSWORD"))
+    facebook_scraper.login()
+    for info in FacebookUser.query.filter(FacebookUser.pages.any(username='schneiderforcongress')):
+        print info.username, info.uid
+        result = facebook_scraper.get_about(info.username, graph_id=info.uid)
+        user = FacebookUser(
+            uid=result.uid, 
+            username=result.username, 
+            email=result.email, 
+            birthday=result.birthday, 
+            sex=result.sex, 
+            college=result.college, 
+            employer=result.employer,
+            highschool=result.highschool,
+            currentcity=result.currentcity,
+            hometown=result.hometown
+        )
+        db.session.merge(user)
+        db.session.commit()
 
 if __name__ == "__main__":
     manager.run()

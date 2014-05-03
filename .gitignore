@@ -1,5 +1,6 @@
 .secret*
 *.pyc
+*.pickle
 *.log
 .DS_Store
 venv
