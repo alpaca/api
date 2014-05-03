@@ -195,5 +195,16 @@ def import_csv(path,pkey_colname):
                     db.session.rollback()
     return
 
+def parse_schneider():
+    from socialscraper.facebook.public import parse_url
+    with open('schneider.txt', 'rb') as f:
+        for line in f:
+            url,name = eval(line)
+            username = parse_url(url)
+            string = u'("%s", "%s", "%s")\n' % (url,name,username)
+            print string
+            with open('schneider2.txt', 'a') as f2:
+                f2.write(string.encode('utf-8'))
+
 if __name__ == "__main__":
     manager.run()
