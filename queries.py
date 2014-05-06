@@ -75,4 +75,101 @@ def hometown(city=None, unknown=None):
 
     return query
 
-# print len(sex(sex='f').all())
+
+def collegeInList(collegeList=[], unknown=None):
+    """
+    Queries the database for people who are between a certain age range
+
+    Ignores all people who don't have a birth year set because their birth year is set to 2014 and the query will only query up to january 1st on the current year
+
+    """
+
+    if unknown:
+        query = FacebookUser.query.filter_by(college=None)
+    else:
+        collegeString = ""
+        for college in collegeList:
+            collegeString = collegeString + "OR college Like '%"+college+"%'"
+        collegeString= collegeString[2:]
+        query = FacebookUser.query.from_statement("Select * from facebook_users where " + collegeString)
+
+    return query
+
+def collegeGradYear(minYear = 1000, maxYear = 3000, unknown=None):
+    """
+    Queries the database for people who are between a certain age range
+
+    Ignores all people who don't have a birth year set because their birth year is set to 2014 and the query will only query up to january 1st on the current year
+
+    """
+
+    if unknown:
+        query = FacebookUser.query.filter_by(college=None)
+    else:
+        gradString = ""
+        for year in range(minYear,maxYear):
+            gradString = gradString + "OR college Like '%"+str(year)+"%'"
+        gradString= gradString[2:]
+        query = FacebookUser.query.from_statement("Select * from facebook_users where " + gradString)
+
+    return query
+
+
+def highSchoolGradYear(minYear = 1000, maxYear = 3000, unknown=None):
+    """
+    Queries the database for people who are between a certain age range
+
+    Ignores all people who don't have a birth year set because their birth year is set to 2014 and the query will only query up to january 1st on the current year
+
+    """
+
+    if unknown:
+        query = FacebookUser.query.filter_by(highschool=None)
+    else:
+        gradString = ""
+        for year in range(minYear,maxYear):
+            gradString = gradString + "OR highschool Like '%"+str(year)+"%'"
+        gradString= gradString[2:]
+        query = FacebookUser.query.from_statement("Select * from facebook_users where " + gradString)
+
+    return query
+
+def highSchoolInList(schoolList=[], unknown=None):
+    """
+    Queries the database for people who are between a certain age range
+
+    Ignores all people who don't have a birth year set because their birth year is set to 2014 and the query will only query up to january 1st on the current year
+
+    """
+
+    if unknown:
+        query = FacebookUser.query.filter_by(highschool=None)
+    else:
+        schoolString = ""
+        for school in schoolList:
+            schoolString = schoolString + "OR highschool Like '%"+school+"%'"
+        schoolString= schoolString[2:]
+        query = FacebookUser.query.from_statement("Select * from facebook_users where " + schoolString)
+
+    return query
+
+def employerInList(schoolList=[], unknown=None):
+    """
+    Queries the database for people who are between a certain age range
+
+    Ignores all people who don't have a birth year set because their birth year is set to 2014 and the query will only query up to january 1st on the current year
+
+    """
+
+    if unknown:
+        query = FacebookUser.query.filter_by(employer=None)
+    else:
+        employerString = ""
+        for employer in employerList:
+            employerString = employerString + "OR employer Like '%"+employer+"%'"
+        employerString= employerString[2:]
+        query = FacebookUser.query.from_statement("Select * from facebook_users where " + employerString)
+
+    return query
+
+print type(and_(highSchoolGradYear(1960, 1980), collegeInList(["Illinois"])))
