@@ -117,6 +117,7 @@ def get_about(username):
         currentcity=result.currentcity,
         hometown=result.hometown
     )
+    
 
     db.session.merge(user)
     db.session.commit()
