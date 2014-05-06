@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from . import db
 from sqlalchemy import Table
 from sqlalchemy.orm import mapper
