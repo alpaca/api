@@ -231,5 +231,15 @@ def schneider():
         db.session.merge(user)
         db.session.commit()
 
+@manager.command
+def something():
+    from socialscraper import facebook
+    serialized_browser = open( "browser.pickle", "rb" ).read()
+    serialized_api = open( "api.pickle", "rb" ).read()
+    facebook_scraper = facebook.FacebookScraper(pickled_session=serialized_browser, pickled_api=serialized_api, scraper_type="nograph")
+    facebook_scraper.add_user(email=os.getenv("FACEBOOK_USERNAME"), password=os.getenv("FACEBOOK_PASSWORD"))
+    facebook_scraper.pick_random_user()
+
+
 if __name__ == "__main__":
     manager.run()

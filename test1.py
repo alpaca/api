@@ -14,3 +14,7 @@ print sum(is_user_public_list)/len(is_user_public_list)
 # map(lambda task: task.result if task.status == "SUCCESS", res.get())
 
 # process_list = (scrape.get_unscraped_users.s() | scrape.dmap.s(scrape.get_about.s()))
+
+# all_users = FacebookUser.query.all()
+# empty_users = FacebookUser.query.filter_by(hometown=None, birthday=None, email=None, college=None, highschool=None, employer=None, currentcity=None).all()
+# empty_users = lambda : FacebookUser.query.filter_by(hometown=None, birthday=None, email=None, college=None, highschool=None, employer=None, currentcity=None).all()
