@@ -5,9 +5,10 @@ import logging, os, sys, pickle, pdb
 from celery.signals import worker_init
 from celery import group, chord, subtask
 from socialscraper import twitter, facebook
+from datetime import datetime
 
 from app.tasks import celery
-from app.models import db, FacebookUser, FacebookPage
+from app.models import db, FacebookUser, FacebookPage, Transaction
 
 logger = logging.getLogger(__name__)
 
@@ -117,9 +118,19 @@ def get_about(username):
         currentcity=result.currentcity,
         hometown=result.hometown
     )
+
+    transact_type = 'create' if len(FacebookUser.query.filter_by(uid=result.uid).all()) == 0 else 'update'
     
+    transaction = Transaction(
+        timestamp = datetime.utcnow(),
+        transact_type = transact_type,
+        ref = "%s.%s" % (FacebookUser.__tablename__, str(result.uid)),
+        func = 'get_about(%s)' % username,
+        data = str(result)
+    )
 
     db.session.merge(user)
+    db.session.add(transaction)
     db.session.commit()
 
     logger.info(result)
