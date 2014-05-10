@@ -21,7 +21,7 @@ def get_model_properties(model):
 		for key in pkeys: # uid
 			# FacebookUser(uid=1000)
 			# dupes.filter_by(uid=1000)
-			dupes = dupes.filter_by(**{key: kwargs[key]})
+			dupes = dupes.filter_by(**{key: kwargs.get(key)})
 
 		#import pdb; pdb.set_trace()
 		dupe = None if len(dupes.all()) == 0 else dupes.first()

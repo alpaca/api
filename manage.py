@@ -45,7 +45,10 @@ BANNER = "Run the following commands: \n" + \
          "from app.models import * \n" + \
          "from app.tasks import scrape \n\n" + \
          "scrape.about.delay() \n" + \
-         "scrape.categories.delay() \n"
+         "scrape.categories.delay() \n" + \
+         "process_list = (scrape.get_usernames.s() | scrape.dmap.s(scrape.get_about.s())) \n" + \
+         "serialized_browser = open( 'browser.pickle', 'rb' ).read() \n" + \
+         "serialized_api = open( 'api.pickle', 'rb' ).read() \n"
 
          # "# if you want to scrape within this shell and not in celery \n" + \
          # "scrape.facebook_scraper.login() \n" + \
