@@ -243,6 +243,16 @@ def something():
     facebook_scraper.add_user(email=os.getenv("FACEBOOK_USERNAME"), password=os.getenv("FACEBOOK_PASSWORD"))
     facebook_scraper.pick_random_user()
 
+from subprocess import call, check_output
+
+@manager.command
+def drop_table(tablename):
+    call(["psql", "-d", "alpaca_api_development", "-c", "DROP TABLE %s CASCADE" % tablename])
+
+@manager.command
+def restore_table(tablename, filename):
+    call(["pg_restore", "-d", "alpaca_api_development", "--table", tablename, filename])
+
 
 if __name__ == "__main__":
     manager.run()
