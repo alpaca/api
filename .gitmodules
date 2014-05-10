@@ -6,3 +6,7 @@
 	path = lib/identityresolver
 	url = https://github.com/alpaca/identityresolver
 	branch = master
+[submodule "lib/contribscraper"]
+	path = lib/contribscraper
+	url = git@github.com:alpaca/contribscraper.git
+	branch = master
