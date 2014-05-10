@@ -253,6 +253,11 @@ def drop_table(tablename):
 def restore_table(tablename, filename):
     call(["pg_restore", "-d", "alpaca_api_development", "--table", tablename, filename])
 
+@manager.command
+def clear_rabbit():
+    call(["rabbitmqctl", "stop_app"])
+    call(["rabbitmqctl", "reset"])
+    call(["rabbitmqctl", "start_app"])
 
 if __name__ == "__main__":
     manager.run()
