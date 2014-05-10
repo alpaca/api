@@ -16,26 +16,12 @@ def get_model_properties(model):
 			pkeys.append(col.name)
 	properties['__tablename__'] = model.__tablename__
 
-	def init_fn(self,**kwargs):
-		dupes = type(self).query # all FB users
-		for key in pkeys: # uid
-			# FacebookUser(uid=1000)
-			# dupes.filter_by(uid=1000)
-			dupes = dupes.filter_by(**{key: kwargs.get(key)})
-
-		#import pdb; pdb.set_trace()
-		dupe = None if len(dupes.all()) == 0 else dupes.first()
-		created_at = dupe.created_at if dupe else datetime.now()
-
-		super(type(self), self).__init__(created_at=created_at,updated_at=datetime.now())
-		for k in kwargs:
-			if dupe and not kwargs[k]:
-				setattr(self,k,getattr(dupe,k))
-			else:
-				setattr(self,k,kwargs[k])
-
-	properties['__init__'] = init_fn
 	return properties
+
+def convert_result(socialscrapermodel, sqlalchemymodel):
+    for key in socialscrapermodel.get_columns():
+        if getattr(result, key):
+            setattr(sqlalchemymodel, key, getattr(result, key))
 
 # def serialize_session(session):
 #     attrs = ['headers', 'cookies', 'auth', 'proxies', 'hooks', 'params', 'verify']
