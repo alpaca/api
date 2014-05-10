@@ -4,13 +4,14 @@ from __future__ import division
 import logging, os, sys, pickle, pdb
 from celery.signals import worker_init
 from celery import group, chord, subtask
+
 from socialscraper.twitter import TwitterScraper
 from socialscraper.facebook import FacebookScraper
 
-import datetime
+from datetime import datetime
 
 from app.tasks import celery
-from app.models import db, FacebookUser, FacebookPage
+from app.models import db, FacebookUser, FacebookPage, Transaction
 
 logger = logging.getLogger(__name__)
 
@@ -61,38 +62,6 @@ def worker_init(*args, **kwargs):
     else:
         facebook_scraper = pickle.load(open( "facebook_scraper.pickle", "rb" ))
 
-    # global twitter_scraper
-
-    # if not os.path.isfile('twitter_scraper.pickle'):
-    #     twitter_scraper = TwitterScraper()
-    #     twitter_scraper.add_user(username=os.getenv("TWITTER_USERNAME"),password=os.getenv('TWITTER_PASSWORD'))
-    #     pickle.dump(twitter_scraper, open('twitter_scraper.pickle', 'wb'))
-    # else:
-    #     twitter_scraper = pickle.load(open( "twitter_scraper.pickle", "rb" ))
-
-    # global serialized_browser, serialized_api
-
-    # if os.path.isfile('browser.pickle'):
-    #     logger.info("using browser pickle")
-    #     serialized_browser = open( "browser.pickle", "rb" ).read()
-    #     # unserialized_browser = pickle.load(open( "browser.pickle", "rb" ))
-    # else:
-    #     facebook_scraper = FacebookScraper()
-    #     facebook_scraper.add_user(email=os.getenv("FACEBOOK_USERNAME"), password=os.getenv("FACEBOOK_PASSWORD"))
-    #     facebook_scraper.login()
-    #     serialized_browser = pickle.dump(facebook_scraper.browser, open('browser.pickle', 'wb'))
-
-    # if os.path.isfile('api.pickle'):
-    #     logger.info("using api pickle")
-    #     serialized_api = open( "api.pickle", "rb" ).read()
-    #     # unserialized_api = pickle.load(open( "api.pickle", "rb" ))
-    #     facebook_scraper = FacebookScraper()
-    #     facebook_scraper.init_api(pickled_api=serialized_api) # test if api.pickle is fresh
-    # else:
-    #     facebook_scraper = FacebookScraper()
-    #     facebook_scraper.init_api()
-    #     serialized_api = pickle.dump(facebook_scraper.api, open('api.pickle', 'wb'))
-
 @celery.task()
 def get_uids(limit=None): 
     return filter(lambda uid: uid, map(lambda user: user.uid, FacebookUser.query.limit(limit).all()))
@@ -135,13 +104,26 @@ def get_about(username):
     if not user:
         user = FacebookUser()
         convert_result(user, result)
-        user.created_at = datetime.datetime.now()
+        user.created_at = datetime.now()
         db.session.add(user)
     else:
         convert_result(user, result)
 
-    user.updated_at = datetime.datetime.now()
+    user.updated_at = datetime.now()
 
+    ## Scrape Transaction
+
+    transact_type = 'create' if len(FacebookUser.query.filter_by(uid=result.uid).all()) == 0 else 'update'
+    
+    transaction = Transaction(
+        timestamp = datetime.utcnow(),
+        transact_type = transact_type,
+        ref = "%s.%s" % (FacebookUser.__tablename__, str(result.uid)),
+        func = 'get_about(%s)' % username,
+        data = str(result)
+    )
+
+    db.session.add(transaction)
     db.session.commit()
 
     logger.info(result)
