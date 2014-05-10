@@ -44,7 +44,7 @@ def _make_context():
 BANNER = "Run the following commands: \n" + \
          "from app.models import * \n" + \
          "from app.tasks import scrape \n\n" + \
-         "scrape.about.delay() \n" + \
+         "scrape.get_about.delay() \n" + \
          "scrape.categories.delay() \n" + \
          "process_list = (scrape.get_usernames.s() | scrape.dmap.s(scrape.get_about.s())) \n" + \
          "serialized_browser = open( 'browser.pickle', 'rb' ).read() \n" + \

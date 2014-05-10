@@ -12,6 +12,7 @@ from datetime import datetime
 
 from app.tasks import celery
 from app.models import db, FacebookUser, FacebookPage, Transaction
+from ..utils import convert_result
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +54,7 @@ def worker_init(*args, **kwargs):
     global facebook_scraper
 
     if not os.path.isfile('facebook_scraper.pickle'):
-        facebook_scraper = FacebookScraper()
+        facebook_scraper = FacebookScraper(scraper_type='nograph')
         facebook_scraper.add_user(email=os.getenv("FACEBOOK_USERNAME"), password=os.getenv("FACEBOOK_PASSWORD"))
         facebook_scraper.pick_random_user()
         facebook_scraper.login()
@@ -108,6 +109,9 @@ def get_about(username):
         db.session.add(user)
     else:
         convert_result(user, result)
+        # db.session.merge(user)
+
+    import pdb; pdb.set_trace()
 
     user.updated_at = datetime.now()
 
@@ -127,7 +131,7 @@ def get_about(username):
     db.session.commit()
 
     logger.info(result)
-    return user
+    return result
 
 @celery.task()
 def dmap(it, callback):
