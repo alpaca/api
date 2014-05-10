@@ -8,6 +8,8 @@ from celery import group, chord, subtask
 from socialscraper.twitter import TwitterScraper
 from socialscraper.facebook import FacebookScraper
 
+from sqlalchemy import or_, and_
+
 from datetime import datetime
 
 from app.tasks import celery
@@ -51,45 +53,59 @@ Although, these tokens are technically for like an hour a pop so that might not 
 @worker_init.connect
 def worker_init(*args, **kwargs):
 
-    global facebook_scraper
+    # global facebook_scraper
 
     if not os.path.isfile('facebook_scraper.pickle'):
         facebook_scraper = FacebookScraper(scraper_type='nograph')
-        facebook_scraper.add_user(email=os.getenv("FACEBOOK_USERNAME"), password=os.getenv("FACEBOOK_PASSWORD"))
+        facebook_scraper.add_user(email=os.getenv('FACEBOOK_EMAIL'), password=os.getenv('FACEBOOK_PASSWORD'))
         facebook_scraper.pick_random_user()
         facebook_scraper.login()
         facebook_scraper.init_api()
         pickle.dump(facebook_scraper, open('facebook_scraper.pickle', 'wb'))
-    else:
-        facebook_scraper = pickle.load(open( "facebook_scraper.pickle", "rb" ))
+    # else:
+    #     facebook_scraper = pickle.load(open( "facebook_scraper.pickle", "rb" ))
 
 @celery.task()
 def get_uids(limit=None): 
     return filter(lambda uid: uid, map(lambda user: user.uid, FacebookUser.query.limit(limit).all()))
 
 @celery.task()
-def get_usernames(limit=None): 
-    return filter(lambda username: username, map(lambda user: user.username, FacebookUser.query.limit(limit).all()))
+def get_usernames(limit=None, get='all'): 
+
+    if get == 'all':
+        return filter(lambda username: username, map(lambda user: user.username, FacebookUser.query.limit(limit).all()))
+    elif get == 'empty':
+        return filter(lambda username: username, 
+            map(lambda user: user.username, 
+                FacebookUser.query.filter_by(
+                    currentcity=None, 
+                    hometown=None, 
+                    college=None, 
+                    highschool=None, 
+                    employer=None, 
+                    birthday=None
+                ).limit(limit).all()
+                )
+            )
+    elif get == 'nonempty':
+        return filter(lambda username: username, 
+            map(lambda user: user.username, 
+                FacebookUser.query.filter(
+                    or_(
+                        FacebookUser.currentcity.isnot(None), 
+                        FacebookUser.hometown.isnot(None), 
+                        FacebookUser.college.isnot(None), 
+                        FacebookUser.highschool.isnot(None), 
+                        FacebookUser.employer.isnot(None), 
+                        FacebookUser.birthday.isnot(None), 
+                    )
+                ).limit(limit).all()
+                )
+            )
 
 @celery.task()
-def get_unscraped_users(limit=None):
-    return filter(lambda username: username, 
-        map(lambda user: user.username, 
-            FacebookUser.query.filter_by(
-                currentcity=None, 
-                hometown=None, 
-                college=None, 
-                highschool=None, 
-                employer=None, 
-                birthday=None
-            ).limit(limit).all()
-            )
-        )
-
-# @celery.task()
-# def get_fucked_up_users(limit=None):
-#     return map(lambda user: user.username, 
-#         FacebookUser.query.filter(FacebookUser.uid < xxxxx).limit(limit).all())
+def get_unscraped_usernames(limit=None):
+    return 
 
 @celery.task()
 def get_pages(limit=None): 
@@ -98,6 +114,8 @@ def get_pages(limit=None):
 # change scraper_type from graphapi to nograph to see different results
 @celery.task()
 def get_about(username):
+
+    facebook_scraper = pickle.load(open( "facebook_scraper.pickle", "rb" ))
 
     result = facebook_scraper.get_about(username)
     user = FacebookUser.query.filter_by(username=username).first()
@@ -110,8 +128,6 @@ def get_about(username):
     else:
         convert_result(user, result)
         # db.session.merge(user)
-
-    import pdb; pdb.set_trace()
 
     user.updated_at = datetime.now()
 
@@ -130,7 +146,6 @@ def get_about(username):
     db.session.add(transaction)
     db.session.commit()
 
-    logger.info(result)
     return result
 
 @celery.task()

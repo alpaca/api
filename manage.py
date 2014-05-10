@@ -42,21 +42,23 @@ def _make_context():
     return dict(app=app, db=db, models=models)
 
 BANNER = "Run the following commands: \n" + \
+         "from __future__ import division \n" + \
+         "from sqlalchemy import and_, or_ \n" + \
+         "import os, pickle, json, requests \n" + \
+         "from socialscraper.facebook import FacebookScraper \n" + \
+         "from socialscraper.twitter import TwitterScraper \n" + \
          "from app.models import * \n" + \
          "from app.tasks import scrape \n\n" + \
+         "facebook_scraper = pickle.load(open( 'facebook_scraper.pickle', 'rb' )) \n\n" + \
+         "facebook_scraper = FacebookScraper(scraper_type='nograph') \n" + \
+         "facebook_scraper.add_user(email=os.getenv('FACEBOOK_EMAIL'), password=os.getenv('FACEBOOK_PASSWORD')) \n" + \
+         "facebook_scraper.pick_random_user() \n" + \
+         "facebook_scraper.login() \n" + \
+         "facebook_scraper.init_api() \n" + \
+         "pickle.dump(facebook_scraper, open('facebook_scraper.pickle', 'wb')) \n\n" + \
          "scrape.get_about.delay() \n" + \
-         "scrape.categories.delay() \n" + \
-         "process_list = (scrape.get_usernames.s() | scrape.dmap.s(scrape.get_about.s())) \n" + \
-         "serialized_browser = open( 'browser.pickle', 'rb' ).read() \n" + \
-         "serialized_api = open( 'api.pickle', 'rb' ).read() \n"
-
-         # "# if you want to scrape within this shell and not in celery \n" + \
-         # "scrape.facebook_scraper.login() \n" + \
-         # "# for celery use .delay at the end of commands \n" + \
-         # "scrape.scrape_page.delay('schneiderforcongress') \n" + \
-         # "scrape.scrape_db_about.delay('schneiderforcongress') \n" + \
-         # "scrape.scrape_db_likes.delay('schneiderforcongress') \n" + \
-
+         "process_list = (scrape.get_usernames.s(get='empty') | scrape.dmap.s(scrape.get_about.s())) \n" + \
+         "res = process_list() \n"
 
 manager.add_command("runserver", Server(host="0.0.0.0"))
 manager.add_command('db', MigrateCommand)
