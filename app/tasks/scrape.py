@@ -87,7 +87,7 @@ def get_usernames(limit=None, get='all'):
                 ).limit(limit).all()
                 )
             )
-    elif get == 'nonempty':
+    elif get == 'nonempty_or':
         return filter(lambda username: username, 
             map(lambda user: user.username, 
                 FacebookUser.query.filter(
@@ -100,6 +100,33 @@ def get_usernames(limit=None, get='all'):
                         FacebookUser.birthday.isnot(None), 
                     )
                 ).limit(limit).all()
+                )
+            )
+    elif get == 'nonempty_and':
+        return filter(lambda username: username, 
+            map(lambda user: user.username, 
+                FacebookUser.query.filter(
+                    and_(
+                        FacebookUser.currentcity.isnot(None), 
+                        FacebookUser.hometown.isnot(None), 
+                        FacebookUser.college.isnot(None), 
+                        FacebookUser.highschool.isnot(None), 
+                        FacebookUser.employer.isnot(None), 
+                        FacebookUser.birthday.isnot(None), 
+                    )
+                ).limit(limit).all()
+                )
+            )
+    elif get == 'haslikes':
+        return filter( username: username,
+                map(lambda user: user.username,
+                    FacebookUser.query.filter(FacebookUser.pages != None).limit(limit).all()
+                )
+            )
+    elif get == 'nolikes':
+        return filter( username: username,
+                map(lambda user: user.username,
+                    FacebookUser.query.filter(FacebookUser.pages == None).limit(limit).all()
                 )
             )
 
@@ -116,20 +143,36 @@ def get_pages(limit=None):
 def get_about(username):
 
     facebook_scraper = pickle.load(open( "facebook_scraper.pickle", "rb" ))
+    try:
+        result = facebook_scraper.get_about(username)
+        user = FacebookUser.query.filter_by(username=username).first()
 
-    result = facebook_scraper.get_about(username)
-    user = FacebookUser.query.filter_by(username=username).first()
+        if not user:
+            user = FacebookUser()
+            convert_result(user, result)
+            user.created_at = datetime.now()
+            db.session.add(user)
+            transact_type = 'create'
+        else:
+            convert_result(user, result)
+            transact_type = 'update'
 
-    if not user:
-        user = FacebookUser()
-        convert_result(user, result)
-        user.created_at = datetime.now()
-        db.session.add(user)
-    else:
-        convert_result(user, result)
-        # db.session.merge(user)
+        user.updated_at = datetime.now()
+    except Exception as e:
+        transaction = Transaction(
+            timestamp = datetime.utcnow(),
+            transact_type = 'error',
+            func = 'get_about(%s)' % username,
+            ref = "%s: %s" % (str(e.errno), e.strerror)
+            )
+        if 'result' in locals():
+            transaction.data = str(result)
+            transaction.ref = "%s.%s" % (FacebookUser.__tablename__, str(result.uid))
 
-    user.updated_at = datetime.now()
+        db.session.add(transaction)
+        db.session.commit()
+        return
+
 
     ## Scrape Transaction
 
@@ -147,6 +190,68 @@ def get_about(username):
     db.session.commit()
 
     return result
+
+@celery.task
+def get_likes(username):
+    
+    facebook_scraper = pickle.load(open( "facebook_scraper.pickle", "rb" ))
+    facebook_scraper.scraper_type = "graphsearch"
+
+    user = FacebookUser.query.filter_by(username=username).first()
+
+    if not user: raise Exception("scrape the dude's about information first plz")
+
+    results = []
+
+    for result in facebook_scraper.graph_search(username, "pages-liked"):
+        try:
+            page = FacebookPage.query.filter_by(username=result.username).first()
+
+            if not page:
+                page = FacebookPage()
+                convert_result(page, result)
+                page.created_at = datetime.now()
+                db.session.add(page)
+                transact_type = 'create'
+            else:
+                convert_result(page, result)
+                transact_type = 'update'
+
+        except Exception as e:
+            transaction = Transaction(
+                timestamp = datetime.utcnow(),
+                transact_type = 'error',
+                func = 'get_about(%s)' % username,
+                ref = "%s: %s" % (str(e.errno), e.strerror)
+                )
+            if 'result' in locals():
+                transaction.data = str(result)
+                
+            db.session.add(transaction)
+            db.session.commit()
+        return
+
+        page.updated_at = datetime.now()
+        page.users.append(user)
+
+        ## Scrape Transaction
+        
+        transaction = Transaction(
+            timestamp = datetime.utcnow(),
+            transact_type = transact_type,
+            ref = "%s.%s" % (FacebookPage.__tablename__, str(result.page_id)),
+            func = 'get_likes(%s)' % username,
+            data = str(result)
+        )
+
+        db.session.add(transaction)        
+        db.session.commit()
+
+        results.append(result)
+        print result
+        logger.info(result)
+
+    return results
 
 @celery.task()
 def dmap(it, callback):

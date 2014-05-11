@@ -57,6 +57,7 @@ BANNER = "Run the following commands: \n" + \
          "facebook_scraper.init_api() \n" + \
          "pickle.dump(facebook_scraper, open('facebook_scraper.pickle', 'wb')) \n\n" + \
          "scrape.get_about.delay() \n" + \
+         "scrape.get_likes.delay() \n" + \
          "process_list = (scrape.get_usernames.s(get='empty') | scrape.dmap.s(scrape.get_about.s())) \n" + \
          "res = process_list() \n"
 
