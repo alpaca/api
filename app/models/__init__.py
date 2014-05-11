@@ -44,6 +44,7 @@ FacebookPage.users = db.relationship('FacebookUser', secondary=FacebookPagesUser
 
 # __all__ = ['FacebookUser', 'FacebookFamily', 'FacebookLocation', 'FacebookFriend', 'FacebookPage', 'FacebookStatus', 'FacebookPagesUsers', 'TwitterUser', 'TwitterTweet']
 from .transactions import Transaction
+from .locations import Location
 from contribscraper.models import *
 Contributor = make_contributor_model(db.Model)
 Committee = make_committee_model(db.Model)

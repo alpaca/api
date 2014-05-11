@@ -59,7 +59,9 @@ BANNER = "Run the following commands: \n" + \
          "scrape.get_about.delay() \n" + \
          "scrape.get_likes.delay() \n" + \
          "process_list = (scrape.get_usernames.s(get='empty') | scrape.dmap.s(scrape.get_about.s())) \n" + \
-         "res = process_list() \n"
+         "res = process_list() \n\n" + \
+         "from app.tasks import datacomplete \n" + \
+         "datacomplete.find_fb_place_addrs() \n"
 
 manager.add_command("runserver", Server(host="0.0.0.0"))
 manager.add_command('db', MigrateCommand)
