@@ -185,7 +185,7 @@ def get_about(username):
 def get_likes(username):
     
     facebook_scraper = pickle.load(open( "facebook_scraper.pickle", "rb" ))
-    facebook_scraper.scraper_type = "graphsearch"
+    facebook_scraper.scraper_type = "public"
 
     user = FacebookUser.query.filter_by(username=username).first()
 
@@ -193,7 +193,7 @@ def get_likes(username):
 
     results = []
 
-    for result in facebook_scraper.graph_search(username, "pages-liked"):
+    for result in facebook_scraper.get_likes(username):
         try:
             page = FacebookPage.query.filter_by(username=result.username).first()
 
