@@ -225,8 +225,9 @@ def permutations(istr, cstr, used_indices):
 
 
 
-perm = permutations([0,1] , [], set())
+perm = permutations(range(len(funcArray)) , [], set())
 
 
 for p in perm:
     buildTree(funcArray=map(lambda x: funcArray[x], p))
+

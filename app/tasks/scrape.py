@@ -60,7 +60,7 @@ def worker_init(*args, **kwargs):
         facebook_scraper.add_user(email=os.getenv('FACEBOOK_EMAIL'), password=os.getenv('FACEBOOK_PASSWORD'))
         facebook_scraper.pick_random_user()
         facebook_scraper.login()
-        facebook_scraper.init_api()
+        # facebook_scraper.init_api()
         pickle.dump(facebook_scraper, open('facebook_scraper.pickle', 'wb'))
     # else:
     #     facebook_scraper = pickle.load(open( "facebook_scraper.pickle", "rb" ))
@@ -118,25 +118,17 @@ def get_usernames(limit=None, get='all'):
                 )
             )
     elif get == 'haslikes':
-        return filter( username: username,
+        return filter(lambda username: username,
                 map(lambda user: user.username,
                     FacebookUser.query.filter(FacebookUser.pages != None).limit(limit).all()
                 )
             )
     elif get == 'nolikes':
-        return filter( username: username,
+        return filter(lambda username: username,
                 map(lambda user: user.username,
                     FacebookUser.query.filter(FacebookUser.pages == None).limit(limit).all()
                 )
             )
-
-@celery.task()
-def get_unscraped_usernames(limit=None):
-    return 
-
-@celery.task()
-def get_pages(limit=None): 
-    return map(lambda page: page.username, FacebookPage.query.limit(limit).all())
 
 # change scraper_type from graphapi to nograph to see different results
 @celery.task()
@@ -175,8 +167,6 @@ def get_about(username):
 
 
     ## Scrape Transaction
-
-    transact_type = 'create' if len(FacebookUser.query.filter_by(uid=result.uid).all()) == 0 else 'update'
     
     transaction = Transaction(
         timestamp = datetime.utcnow(),
@@ -221,7 +211,7 @@ def get_likes(username):
             transaction = Transaction(
                 timestamp = datetime.utcnow(),
                 transact_type = 'error',
-                func = 'get_about(%s)' % username,
+                func = 'get_likes(%s)' % username,
                 ref = "%s: %s" % (str(e.errno), e.strerror)
                 )
             if 'result' in locals():
@@ -229,7 +219,7 @@ def get_likes(username):
                 
             db.session.add(transaction)
             db.session.commit()
-        return
+            return
 
         page.updated_at = datetime.now()
         page.users.append(user)
@@ -244,7 +234,7 @@ def get_likes(username):
             data = str(result)
         )
 
-        db.session.add(transaction)        
+        db.session.add(transaction)
         db.session.commit()
 
         results.append(result)
