@@ -49,17 +49,20 @@ BANNER = "Run the following commands: \n" + \
          "from socialscraper.twitter import TwitterScraper \n" + \
          "from app.models import * \n" + \
          "from app.tasks import scrape \n\n" + \
+         "scrape.get_about() \n" + \
+         "scrape.get_likes() \n\n" + \
+         "scrape.get_about.delay() \n" + \
+         "scrape.get_likes.delay() \n\n" + \
+         "process_list = (scrape.get_usernames.s(get='empty') | scrape.dmap.s(scrape.get_about.s())) \n" + \
+         "res = process_list() \n\n" + \
+         "# reuse logged in facebook_scraper pickle \n" + \
          "facebook_scraper = pickle.load(open( 'facebook_scraper.pickle', 'rb' )) \n\n" + \
          "facebook_scraper = FacebookScraper(scraper_type='nograph') \n" + \
-         "facebook_scraper.add_user(email=os.getenv('FACEBOOK_EMAIL'), password=os.getenv('FACEBOOK_PASSWORD')) \n" + \
+         "facebook_scraper.add_user(email=os.getenv('FACEBOOK_EMAIL'), password=os.getenv('FACEBOOK_PASSWORD'), id=os.getenv('FACEBOOK_USERID'), username=os.getenv('FACEBOOK_USERNAME')) \n" + \
          "facebook_scraper.pick_random_user() \n" + \
          "facebook_scraper.login() \n" + \
          "facebook_scraper.init_api() \n" + \
-         "pickle.dump(facebook_scraper, open('facebook_scraper.pickle', 'wb')) \n\n" + \
-         "scrape.get_about.delay() \n" + \
-         "scrape.get_likes.delay() \n" + \
-         "process_list = (scrape.get_usernames.s(get='empty') | scrape.dmap.s(scrape.get_about.s())) \n" + \
-         "res = process_list() \n"
+         "pickle.dump(facebook_scraper, open('facebook_scraper.pickle', 'wb')) \n"
 
 manager.add_command("runserver", Server(host="0.0.0.0"))
 manager.add_command('db', MigrateCommand)

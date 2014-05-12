@@ -26,27 +26,8 @@ Essentially, the requests session is based on a urllib3 pool which gets full if 
 try to do thousands of requests from the same session. Thus we're no longer going with
 a module level facebook_scraper.
 
-Instead we instantiate a scraper to login to Facebook and serialize the session object.
-
-We keep this serialized_browser at the module level and instantiate a new FacebookScraper
-in each task that uses the serialized_browser as a parameter.
-
-I should remove code that deals with pickling stuff from socialscraper. Instead unpickle
-here and pass the real objects around in the library.
-
-If I can figure out those urllib pool problems properly I won't have to do any of this stuff.
-
-Or perhaps in the library itself I create a new session object everytime I want to do anything?
-Seems like a lot of overhead because I'd need to deepcopy the logged_in cookiejar each time.
-
----------------------------------------
-
-The same stuff applies for the GraphAPI although its probably overkill. In order to prevent
-stale user access tokens, I run the init_api method to test whether the access token works.
-
-I only test it in worker_init and assume it'll continue to work throughout the rest of the code.
-
-Although, these tokens are technically for like an hour a pop so that might not be the best assumption.
+Made an issue about it:
+https://github.com/shazow/urllib3/issues/384
 
 """
 
@@ -185,7 +166,7 @@ def get_about(username):
 def get_likes(username):
     
     facebook_scraper = pickle.load(open( "facebook_scraper.pickle", "rb" ))
-    facebook_scraper.scraper_type = "public"
+    facebook_scraper.scraper_type = "graphsearch" # public
 
     user = FacebookUser.query.filter_by(username=username).first()
 
