@@ -8,6 +8,7 @@ class Config(object):
     TESTING = False
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'postgresql+psycopg2://postgres:postgres@localhost:5432/alpaca_api_development')
     SQLALCHEMY_ECHO = False
+    SQLALCHEMY_POOL_SIZE = 100
     BROKER_URL = os.getenv('BROKER_URL', 'amqp://')
     CELERY_RESULT_BACKEND = 'amqp'
     CELERY_TASK_SERIALIZER = 'pickle'

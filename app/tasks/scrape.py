@@ -53,8 +53,11 @@ def get_uids(limit=None):
 @celery.task()
 def get_usernames(limit=None, get='all'): 
 
+    # All Peopl
     if get == 'all':
         return filter(lambda username: username, map(lambda user: user.username, FacebookUser.query.limit(limit).all()))
+
+    # People that have no pieces of about information
     elif get == 'empty':
         return filter(lambda username: username, 
             map(lambda user: user.username, 
@@ -68,6 +71,8 @@ def get_usernames(limit=None, get='all'):
                 ).limit(limit).all()
                 )
             )
+
+    # People that have at least one piece of about information
     elif get == 'nonempty_or':
         return filter(lambda username: username, 
             map(lambda user: user.username, 
@@ -78,11 +83,13 @@ def get_usernames(limit=None, get='all'):
                         FacebookUser.college.isnot(None), 
                         FacebookUser.highschool.isnot(None), 
                         FacebookUser.employer.isnot(None), 
-                        FacebookUser.birthday.isnot(None), 
+                        FacebookUser.birthday.isnot(None)
                     )
                 ).limit(limit).all()
                 )
             )
+
+    # People that have all pieces of about information
     elif get == 'nonempty_and':
         return filter(lambda username: username, 
             map(lambda user: user.username, 
@@ -93,23 +100,65 @@ def get_usernames(limit=None, get='all'):
                         FacebookUser.college.isnot(None), 
                         FacebookUser.highschool.isnot(None), 
                         FacebookUser.employer.isnot(None), 
-                        FacebookUser.birthday.isnot(None), 
+                        FacebookUser.birthday.isnot(None)
                     )
                 ).limit(limit).all()
                 )
             )
+
+    # People with likes
     elif get == 'haslikes':
         return filter(lambda username: username,
                 map(lambda user: user.username,
                     FacebookUser.query.filter(FacebookUser.pages != None).limit(limit).all()
                 )
             )
+
+    # People with no likes
     elif get == 'nolikes':
         return filter(lambda username: username,
                 map(lambda user: user.username,
                     FacebookUser.query.filter(FacebookUser.pages == None).limit(limit).all()
                 )
             )
+
+
+    # People that have at least one piece of about information BUT no likes
+    elif get == 'nonempty_or_nolikes':
+        return filter(lambda username: username, 
+            map(lambda user: user.username, 
+                FacebookUser.query.filter(
+                    and_(
+                        FacebookUser.currentcity.isnot(None), 
+                        FacebookUser.hometown.isnot(None), 
+                        FacebookUser.college.isnot(None), 
+                        FacebookUser.highschool.isnot(None), 
+                        FacebookUser.employer.isnot(None), 
+                        FacebookUser.birthday.isnot(None),
+                        FacebookUser.pages == None
+                    )
+                ).limit(limit).all()
+                )
+            )
+
+    # People that have all pieces of about information BUT no likes
+    elif get == 'nonempty_and_nolikes':
+        return filter(lambda username: username, 
+            map(lambda user: user.username, 
+                FacebookUser.query.filter(
+                    and_(
+                        FacebookUser.currentcity.isnot(None), 
+                        FacebookUser.hometown.isnot(None), 
+                        FacebookUser.college.isnot(None), 
+                        FacebookUser.highschool.isnot(None), 
+                        FacebookUser.employer.isnot(None), 
+                        FacebookUser.birthday.isnot(None),
+                        FacebookUser.pages == None
+                    )
+                ).limit(limit).all()
+                )
+            )
+
 
 # change scraper_type from graphapi to nograph to see different results
 @celery.task()
@@ -174,66 +223,52 @@ def get_likes(username):
 
     results = []
 
-    try:
-        for result in facebook_scraper.get_likes(username):
-            try:
-                page = FacebookPage.query.filter_by(username=result.username).first()
+    for result in facebook_scraper.get_likes(username):
+        try:
+            page = FacebookPage.query.filter_by(username=result.username).first()
 
-                if not page:
-                    page = FacebookPage()
-                    convert_result(page, result)
-                    page.created_at = datetime.now()
-                    db.session.add(page)
-                    transact_type = 'create'
-                else:
-                    convert_result(page, result)
-                    transact_type = 'update'
+            if not page:
+                page = FacebookPage()
+                convert_result(page, result)
+                page.created_at = datetime.now()
+                db.session.add(page)
+                transact_type = 'create'
+            else:
+                convert_result(page, result)
+                transact_type = 'update'
 
-            except Exception as e:
-                transaction = Transaction(
-                    timestamp = datetime.utcnow(),
-                    transact_type = 'error',
-                    func = 'get_likes(%s)' % username,
-                    ref = "%s: %s" % (str(e.errno), e.strerror)
-                    )
-                if 'result' in locals():
-                    transaction.data = str(result)
-                    
-                db.session.add(transaction)
-                db.session.commit()
-                return      
-
-            page.updated_at = datetime.now()
-            page.users.append(user)
-
-            ## Scrape Transaction
-            
+        except Exception as e:
             transaction = Transaction(
                 timestamp = datetime.utcnow(),
-                transact_type = transact_type,
-                ref = "%s.%s" % (FacebookPage.__tablename__, str(result.page_id)),
+                transact_type = 'error',
                 func = 'get_likes(%s)' % username,
-                data = str(result)
-            )
-
+                ref = "%s: %s" % (str(e.errno), e.strerror)
+                )
+            if 'result' in locals():
+                transaction.data = str(result)
+                
             db.session.add(transaction)
             db.session.commit()
+            return      
 
-            results.append(result)
-            logger.info(result)
+        page.updated_at = datetime.now()
+        page.users.append(user)
 
-    except Exception as e:
-
+        ## Scrape Transaction
+        
         transaction = Transaction(
             timestamp = datetime.utcnow(),
-            transact_type = 'error',
+            transact_type = transact_type,
+            ref = "%s.%s" % (FacebookPage.__tablename__, str(result.page_id)),
             func = 'get_likes(%s)' % username,
-            ref = "%s: %s" % (str(e.errno), e.strerror)
-            )
-            
+            data = str(result)
+        )
+
         db.session.add(transaction)
         db.session.commit()
-        return
+
+        results.append(result)
+        logger.info(result)
 
     return results
 
