@@ -166,7 +166,7 @@ def get_about(username):
 def get_likes(username):
     
     facebook_scraper = pickle.load(open( "facebook_scraper.pickle", "rb" ))
-    facebook_scraper.scraper_type = "graphsearch" # public
+    facebook_scraper.scraper_type = "nograph"
 
     user = FacebookUser.query.filter_by(username=username).first()
 
@@ -174,53 +174,66 @@ def get_likes(username):
 
     results = []
 
-    for result in facebook_scraper.get_likes(username):
-        try:
-            page = FacebookPage.query.filter_by(username=result.username).first()
+    try:
+        for result in facebook_scraper.get_likes(username):
+            try:
+                page = FacebookPage.query.filter_by(username=result.username).first()
 
-            if not page:
-                page = FacebookPage()
-                convert_result(page, result)
-                page.created_at = datetime.now()
-                db.session.add(page)
-                transact_type = 'create'
-            else:
-                convert_result(page, result)
-                transact_type = 'update'
+                if not page:
+                    page = FacebookPage()
+                    convert_result(page, result)
+                    page.created_at = datetime.now()
+                    db.session.add(page)
+                    transact_type = 'create'
+                else:
+                    convert_result(page, result)
+                    transact_type = 'update'
 
-        except Exception as e:
+            except Exception as e:
+                transaction = Transaction(
+                    timestamp = datetime.utcnow(),
+                    transact_type = 'error',
+                    func = 'get_likes(%s)' % username,
+                    ref = "%s: %s" % (str(e.errno), e.strerror)
+                    )
+                if 'result' in locals():
+                    transaction.data = str(result)
+                    
+                db.session.add(transaction)
+                db.session.commit()
+                return      
+
+            page.updated_at = datetime.now()
+            page.users.append(user)
+
+            ## Scrape Transaction
+            
             transaction = Transaction(
                 timestamp = datetime.utcnow(),
-                transact_type = 'error',
+                transact_type = transact_type,
+                ref = "%s.%s" % (FacebookPage.__tablename__, str(result.page_id)),
                 func = 'get_likes(%s)' % username,
-                ref = "%s: %s" % (str(e.errno), e.strerror)
-                )
-            if 'result' in locals():
-                transaction.data = str(result)
-                
+                data = str(result)
+            )
+
             db.session.add(transaction)
             db.session.commit()
-            return
 
-        page.updated_at = datetime.now()
-        page.users.append(user)
+            results.append(result)
+            logger.info(result)
 
-        ## Scrape Transaction
-        
+    except Exception as e:
+
         transaction = Transaction(
             timestamp = datetime.utcnow(),
-            transact_type = transact_type,
-            ref = "%s.%s" % (FacebookPage.__tablename__, str(result.page_id)),
+            transact_type = 'error',
             func = 'get_likes(%s)' % username,
-            data = str(result)
-        )
-
+            ref = "%s: %s" % (str(e.errno), e.strerror)
+            )
+            
         db.session.add(transaction)
         db.session.commit()
-
-        results.append(result)
-        print result
-        logger.info(result)
+        return
 
     return results
 
