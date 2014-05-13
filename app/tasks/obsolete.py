@@ -249,7 +249,7 @@
 #             page.users.append(user)
 #             db.session.merge(page)
 #             db.session.commit()
-#     except ValueError, IndexError:
+#     except (ValueError, IndexError):
 #         print "[Caught a recognized exception (IndexError or ValueError.) It's probably fine.]"
 #         pass
 #     return

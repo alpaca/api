@@ -43,6 +43,11 @@ FacebookPage.users = db.relationship('FacebookUser', secondary=FacebookPagesUser
 # FacebookPage.locations = db.relationship('FacebookLocation') page_id -> gid
 
 # __all__ = ['FacebookUser', 'FacebookFamily', 'FacebookLocation', 'FacebookFriend', 'FacebookPage', 'FacebookStatus', 'FacebookPagesUsers', 'TwitterUser', 'TwitterTweet']
-__all__ = ['FacebookPage', 'FacebookUser', 'FacebookPagesUsers']
+from .transactions import Transaction
+from .locations import Location
+from contribscraper.models import *
+Contributor = make_contributor_model(db.Model)
+Committee = make_committee_model(db.Model)
+__all__ = ['FacebookPage', 'FacebookUser', 'FacebookPagesUsers', 'Transaction', 'Contributor', 'Committee']
 
 from . import *

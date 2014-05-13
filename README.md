@@ -10,10 +10,17 @@ cd ../identityresolver
 git checkout master
 cd ../..
 pip install -r requirements.txt
-python manage.py db init
 # go create a database and then
-python manage.py db migrate
 python manage.py db upgrade
 cp .secret.example .secret
 # go edit .secret
 ```
+
+Workon Alpaca
+----------------------
+```
+workon alpaca
+git pull 
+git submodule update --recursive
+```
+

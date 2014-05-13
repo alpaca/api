@@ -1,6 +1,6 @@
 from __future__ import division
 from app.tasks import scrape
-process_list = (scrape.get_users.s() | scrape.dmap.s(scrape.get_about.s()))
+process_list = (scrape.get_usernames.s() | scrape.dmap.s(scrape.get_about.s()))
 res = process_list()
 pickle.dump( res.get(), open('res.p', 'wb') )
 

@@ -42,18 +42,36 @@ def _make_context():
     return dict(app=app, db=db, models=models)
 
 BANNER = "Run the following commands: \n" + \
+         "from __future__ import division \n" + \
+         "from sqlalchemy import and_, or_ \n" + \
+         "import os, pickle, json, requests \n" + \
+         "from socialscraper.facebook import FacebookScraper \n" + \
+         "from socialscraper.twitter import TwitterScraper \n" + \
          "from app.models import * \n" + \
          "from app.tasks import scrape \n\n" + \
-         "scrape.about.delay() \n" + \
-         "scrape.categories.delay() \n"
-
-         # "# if you want to scrape within this shell and not in celery \n" + \
-         # "scrape.facebook_scraper.login() \n" + \
-         # "# for celery use .delay at the end of commands \n" + \
-         # "scrape.scrape_page.delay('schneiderforcongress') \n" + \
-         # "scrape.scrape_db_about.delay('schneiderforcongress') \n" + \
-         # "scrape.scrape_db_likes.delay('schneiderforcongress') \n" + \
-
+         "scrape.get_about() \n" + \
+         "scrape.get_likes() \n\n" + \
+         "scrape.get_about.delay() \n" + \
+         "scrape.get_likes.delay() \n\n" + \
+         "process_list = (scrape.get_usernames.s(get='empty') | scrape.dmap.s(scrape.get_about.s())) \n" + \
+         "res = process_list() \n\n" + \
+         "# reuse logged in facebook_scraper pickle \n" + \
+         "facebook_scraper = pickle.load(open( 'facebook_scraper.pickle', 'rb' )) \n\n" + \
+         "facebook_scraper = FacebookScraper(scraper_type='nograph') \n" + \
+         "facebook_scraper.add_user(email=os.getenv('FACEBOOK_EMAIL'), password=os.getenv('FACEBOOK_PASSWORD'), id=os.getenv('FACEBOOK_USERID'), username=os.getenv('FACEBOOK_USERNAME')) \n" + \
+         "facebook_scraper.pick_random_user() \n" + \
+         "facebook_scraper.login() \n" + \
+         "facebook_scraper.init_api() \n" + \
+         "pickle.dump(facebook_scraper, open('facebook_scraper.pickle', 'wb')) \n\n" + \
+         "scrape.get_about.delay() \n" + \
+         "scrape.get_likes.delay() \n" + \
+         "process_list = (scrape.get_usernames.s(get='empty') | scrape.dmap.s(scrape.get_about.s())) \n" + \
+         "process_list = (scrape.get_usernames.s(get='nonempty_or') | scrape.dmap.s(scrape.get_likes.s())) \n" + \
+         "len(map(lambda user: user.username, FacebookUser.query.filter(FacebookUser.pages != None))) \n" + \
+         "len(map(lambda page: page.username, FacebookPage.query.all())) \n" + \
+         "res = process_list() \n\n" + \
+         "from app.tasks import datacomplete \n" + \
+         "datacomplete.find_fb_place_addrs() \n"
 
 manager.add_command("runserver", Server(host="0.0.0.0"))
 manager.add_command('db', MigrateCommand)
@@ -240,6 +258,21 @@ def something():
     facebook_scraper.add_user(email=os.getenv("FACEBOOK_USERNAME"), password=os.getenv("FACEBOOK_PASSWORD"))
     facebook_scraper.pick_random_user()
 
+from subprocess import call, check_output
+
+@manager.command
+def drop_table(tablename):
+    call(["psql", "-d", "alpaca_api_development", "-c", "DROP TABLE %s CASCADE" % tablename])
+
+@manager.command
+def restore_table(tablename, filename):
+    call(["pg_restore", "-d", "alpaca_api_development", "--table", tablename, filename])
+
+@manager.command
+def clear_rabbit():
+    call(["rabbitmqctl", "stop_app"])
+    call(["rabbitmqctl", "reset"])
+    call(["rabbitmqctl", "start_app"])
 
 if __name__ == "__main__":
     manager.run()

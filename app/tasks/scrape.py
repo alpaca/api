@@ -4,19 +4,19 @@ from __future__ import division
 import logging, os, sys, pickle, pdb
 from celery.signals import worker_init
 from celery import group, chord, subtask
-from socialscraper import twitter, facebook
+
+from socialscraper.twitter import TwitterScraper
+from socialscraper.facebook import FacebookScraper
+
+from sqlalchemy import or_, and_
+
+from datetime import datetime
 
 from app.tasks import celery
-from app.models import db, FacebookUser, FacebookPage
+from app.models import db, FacebookUser, FacebookPage, Transaction
+from ..utils import convert_result
 
 logger = logging.getLogger(__name__)
-
-# twitter_scraper = twitter.TwitterScraper()
-# twitter_username = os.getenv("TWITTER_USERNAME")
-# twitter_password = os.getenv('TWITTER_PASSWORD')
-# if twitter_username and twitter_password:
-#     twitter_scraper.add_user(username=twitter_username,password=twitter_password)
-
 
 """
 
@@ -26,104 +26,216 @@ Essentially, the requests session is based on a urllib3 pool which gets full if 
 try to do thousands of requests from the same session. Thus we're no longer going with
 a module level facebook_scraper.
 
-Instead we instantiate a scraper to login to Facebook and serialize the session object.
-
-We keep this serialized_browser at the module level and instantiate a new FacebookScraper
-in each task that uses the serialized_browser as a parameter.
-
-I should remove code that deals with pickling stuff from socialscraper. Instead unpickle
-here and pass the real objects around in the library.
-
-If I can figure out those urllib pool problems properly I won't have to do any of this stuff.
-
-Or perhaps in the library itself I create a new session object everytime I want to do anything?
-Seems like a lot of overhead because I'd need to deepcopy the logged_in cookiejar each time.
-
----------------------------------------
-
-The same stuff applies for the GraphAPI although its probably overkill. In order to prevent
-stale user access tokens, I run the init_api method to test whether the access token works.
-
-I only test it in worker_init and assume it'll continue to work throughout the rest of the code.
-
-Although, these tokens are technically for like an hour a pop so that might not be the best assumption.
+Made an issue about it:
+https://github.com/shazow/urllib3/issues/384
 
 """
 
 @worker_init.connect
 def worker_init(*args, **kwargs):
-    global serialized_browser, serialized_api
 
-    if os.path.isfile('browser.pickle'):
-        logger.info("using browser pickle")
-        serialized_browser = open( "browser.pickle", "rb" ).read()
-        # unserialized_browser = pickle.load(open( "browser.pickle", "rb" ))
-    else:
-        facebook_scraper = facebook.FacebookScraper()
-        facebook_scraper.add_user(email=os.getenv("FACEBOOK_USERNAME"), password=os.getenv("FACEBOOK_PASSWORD"))
+    # global facebook_scraper
+
+    if not os.path.isfile('facebook_scraper.pickle'):
+        facebook_scraper = FacebookScraper(scraper_type='nograph')
+        facebook_scraper.add_user(email=os.getenv('FACEBOOK_EMAIL'), password=os.getenv('FACEBOOK_PASSWORD'))
+        facebook_scraper.pick_random_user()
         facebook_scraper.login()
-        serialized_browser = pickle.dump(facebook_scraper.browser, open('browser.pickle', 'wb'))    
-
-    if os.path.isfile('api.pickle'):
-        logger.info("using api pickle")
-        serialized_api = open( "api.pickle", "rb" ).read()
-        # unserialized_api = pickle.load(open( "api.pickle", "rb" ))
-        facebook_scraper = facebook.FacebookScraper()
-        facebook_scraper.init_api(pickled_api=serialized_api) # test if api.pickle is fresh
-    else:
-        facebook_scraper = facebook.FacebookScraper()
-        facebook_scraper.init_api()
-        serialized_api = pickle.dump(facebook_scraper.api, open('api.pickle', 'wb'))
+        # facebook_scraper.init_api()
+        pickle.dump(facebook_scraper, open('facebook_scraper.pickle', 'wb'))
+    # else:
+    #     facebook_scraper = pickle.load(open( "facebook_scraper.pickle", "rb" ))
 
 @celery.task()
-def get_users(limit=None): 
-    return map(lambda user: user.username, FacebookUser.query.limit(limit).all())
+def get_uids(limit=None): 
+    return filter(lambda uid: uid, map(lambda user: user.uid, FacebookUser.query.limit(limit).all()))
 
 @celery.task()
-def get_unscraped_users(limit=None):
-    return map(lambda user: user.username, 
-        FacebookUser.query.filter_by(
-            currentcity=None, 
-            hometown=None, 
-            college=None, 
-            highschool=None, 
-            employer=None, 
-            birthday=None
-        ).limit(limit).all())
+def get_usernames(limit=None, get='all'): 
 
-@celery.task()
-def get_pages(limit=None): 
-    return map(lambda page: page.username, FacebookPage.query.limit(limit).all())
+    if get == 'all':
+        return filter(lambda username: username, map(lambda user: user.username, FacebookUser.query.limit(limit).all()))
+    elif get == 'empty':
+        return filter(lambda username: username, 
+            map(lambda user: user.username, 
+                FacebookUser.query.filter_by(
+                    currentcity=None, 
+                    hometown=None, 
+                    college=None, 
+                    highschool=None, 
+                    employer=None, 
+                    birthday=None
+                ).limit(limit).all()
+                )
+            )
+    elif get == 'nonempty_or':
+        return filter(lambda username: username, 
+            map(lambda user: user.username, 
+                FacebookUser.query.filter(
+                    or_(
+                        FacebookUser.currentcity.isnot(None), 
+                        FacebookUser.hometown.isnot(None), 
+                        FacebookUser.college.isnot(None), 
+                        FacebookUser.highschool.isnot(None), 
+                        FacebookUser.employer.isnot(None), 
+                        FacebookUser.birthday.isnot(None), 
+                    )
+                ).limit(limit).all()
+                )
+            )
+    elif get == 'nonempty_and':
+        return filter(lambda username: username, 
+            map(lambda user: user.username, 
+                FacebookUser.query.filter(
+                    and_(
+                        FacebookUser.currentcity.isnot(None), 
+                        FacebookUser.hometown.isnot(None), 
+                        FacebookUser.college.isnot(None), 
+                        FacebookUser.highschool.isnot(None), 
+                        FacebookUser.employer.isnot(None), 
+                        FacebookUser.birthday.isnot(None), 
+                    )
+                ).limit(limit).all()
+                )
+            )
+    elif get == 'haslikes':
+        return filter(lambda username: username,
+                map(lambda user: user.username,
+                    FacebookUser.query.filter(FacebookUser.pages != None).limit(limit).all()
+                )
+            )
+    elif get == 'nolikes':
+        return filter(lambda username: username,
+                map(lambda user: user.username,
+                    FacebookUser.query.filter(FacebookUser.pages == None).limit(limit).all()
+                )
+            )
 
 # change scraper_type from graphapi to nograph to see different results
 @celery.task()
 def get_about(username):
-    facebook_scraper = facebook.FacebookScraper(pickled_session=serialized_browser, pickled_api=serialized_api, scraper_type="nograph")
-    facebook_scraper.add_user(email=os.getenv("FACEBOOK_USERNAME"), password=os.getenv("FACEBOOK_PASSWORD"))
-    facebook_scraper.pick_random_user()
 
-    result = facebook_scraper.get_about(username)
+    facebook_scraper = pickle.load(open( "facebook_scraper.pickle", "rb" ))
+    try:
+        result = facebook_scraper.get_about(username)
+        user = FacebookUser.query.filter_by(username=username).first()
 
-    # Find better way to do this!!! Mad ugly to repeat this code.
-    user = FacebookUser(
-        uid=result.uid, 
-        username=result.username, 
-        email=result.email, 
-        birthday=result.birthday, 
-        sex=result.sex, 
-        college=result.college, 
-        employer=result.employer,
-        highschool=result.highschool,
-        currentcity=result.currentcity,
-        hometown=result.hometown
-    )
+        if not user:
+            user = FacebookUser()
+            convert_result(user, result)
+            user.created_at = datetime.now()
+            db.session.add(user)
+            transact_type = 'create'
+        else:
+            convert_result(user, result)
+            transact_type = 'update'
+
+        user.updated_at = datetime.now()
+    except Exception as e:
+        transaction = Transaction(
+            timestamp = datetime.utcnow(),
+            transact_type = 'error',
+            func = 'get_about(%s)' % username,
+            ref = "%s: %s" % (str(e.errno), e.strerror)
+            )
+        if 'result' in locals():
+            transaction.data = str(result)
+            transaction.ref = "%s.%s" % (FacebookUser.__tablename__, str(result.uid))
+
+        db.session.add(transaction)
+        db.session.commit()
+        return
+
+
+    ## Scrape Transaction
     
+    transaction = Transaction(
+        timestamp = datetime.utcnow(),
+        transact_type = transact_type,
+        ref = "%s.%s" % (FacebookUser.__tablename__, str(result.uid)),
+        func = 'get_about(%s)' % username,
+        data = str(result)
+    )
 
-    db.session.merge(user)
+    db.session.add(transaction)
     db.session.commit()
 
-    logger.info(result)
     return result
+
+@celery.task
+def get_likes(username):
+    
+    facebook_scraper = pickle.load(open( "facebook_scraper.pickle", "rb" ))
+    facebook_scraper.scraper_type = "nograph"
+
+    user = FacebookUser.query.filter_by(username=username).first()
+
+    if not user: raise Exception("scrape the dude's about information first plz")
+
+    results = []
+
+    try:
+        for result in facebook_scraper.get_likes(username):
+            try:
+                page = FacebookPage.query.filter_by(username=result.username).first()
+
+                if not page:
+                    page = FacebookPage()
+                    convert_result(page, result)
+                    page.created_at = datetime.now()
+                    db.session.add(page)
+                    transact_type = 'create'
+                else:
+                    convert_result(page, result)
+                    transact_type = 'update'
+
+            except Exception as e:
+                transaction = Transaction(
+                    timestamp = datetime.utcnow(),
+                    transact_type = 'error',
+                    func = 'get_likes(%s)' % username,
+                    ref = "%s: %s" % (str(e.errno), e.strerror)
+                    )
+                if 'result' in locals():
+                    transaction.data = str(result)
+                    
+                db.session.add(transaction)
+                db.session.commit()
+                return      
+
+            page.updated_at = datetime.now()
+            page.users.append(user)
+
+            ## Scrape Transaction
+            
+            transaction = Transaction(
+                timestamp = datetime.utcnow(),
+                transact_type = transact_type,
+                ref = "%s.%s" % (FacebookPage.__tablename__, str(result.page_id)),
+                func = 'get_likes(%s)' % username,
+                data = str(result)
+            )
+
+            db.session.add(transaction)
+            db.session.commit()
+
+            results.append(result)
+            logger.info(result)
+
+    except Exception as e:
+
+        transaction = Transaction(
+            timestamp = datetime.utcnow(),
+            transact_type = 'error',
+            func = 'get_likes(%s)' % username,
+            ref = "%s: %s" % (str(e.errno), e.strerror)
+            )
+            
+        db.session.add(transaction)
+        db.session.commit()
+        return
+
+    return results
 
 @celery.task()
 def dmap(it, callback):
