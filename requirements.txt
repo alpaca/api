@@ -34,7 +34,6 @@ googlemaps==1.0.2
 greenlet==0.4.2
 gunicorn==18.0
 honcho==0.5.0
--e git://github.com/alpaca/identityresolver.git@cecaeed00c4e3244d5748d2cab2c8391e1216752#egg=identityresolver-origin/master
 itsdangerous==0.24
 kombu==3.0.14
 lxml==3.3.5
