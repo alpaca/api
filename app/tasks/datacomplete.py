@@ -1,7 +1,7 @@
 from app.models import db, FacebookUser, Location
 from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
-from geopy.geocoders import GoogleV3
+from geopy.geocoders import GoogleV3,GeoNames
 from geopy.exc import GeocoderServiceError
 
 import ast, re
@@ -63,19 +63,30 @@ def get_zipcode_for_cities():
 	locations_hometown = Location.query.filter_by(type='hometown').all()
 	locations_curcity = Location.query.filter_by(type='currentcity').all()
 	locations = locations_hometown + locations_curcity
-	
+
 	geolocator = GoogleV3()
 	regex = re.compile(r'[A-Z]{2} [0-9]{5},')
 
-	for location in locations:
-		addr,_ = geolocator.reverse((location.latitude,location.longitude))
-		try:
-			zipcode = regex.findall()[0].split(' ')[1].rstrip(',')
-			location.zipcode = zipcode
-			db.session.merge(location)
-			db.session.commit()
-		except KeyError:
-			pass
+	for idx,location in enumerate(locations):
+		if location.zipcode == 0:
+			try:
+				point = (location.latitude,location.longitude)
+				loc = geolocator.reverse(point)[0]
+				addr = loc.address
+				# print addr
+				zipcode = regex.findall(addr)[0].split(' ')[1].rstrip(',')
+				location.zipcode = zipcode
+				print zipcode
+				db.session.merge(location)
+				db.session.commit()
+			except KeyError:
+				print "caught KeyError"
+			except IndexError:
+				print "caught IndexError"
+			except TypeError:
+				print "caught TypeError"
+		else:
+			print "zipcode already exists: %i" % idx
 
 def get_coords_for_place(place):
     regex = re.compile("[A-Z]{2} [0-9]{5},")
