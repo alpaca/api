@@ -1,9 +1,10 @@
+import csv
 from app.models import *
 from sqlalchemy import or_, and_
 from datetime import datetime
 from dateutil import parser
 
-def birthday(min_age=0, max_age=10000, unknown=None):
+def birthday(age = [0, 10000], unknown=None):
     """
     Queries the database for people who are between a certain age range
 
@@ -14,6 +15,8 @@ def birthday(min_age=0, max_age=10000, unknown=None):
     if unknown:
         query = FacebookUser.query.filter_by(birthday=None)
     else:
+        min_age = age[0]
+        max_age = age[1]
         tNow = datetime.now()
         query = FacebookUser.query.filter(
             FacebookUser.birthday.between(
@@ -45,7 +48,7 @@ def sex(sex=None, unknown=None):
 
     return query.all()
 
-def currentcity(city=[], unknown=None):
+def currentcity(cityList=[], unknown=None):
     """
     Queries the database for people who are between a certain age range
 
@@ -163,7 +166,7 @@ def highSchoolInList(schoolList=[], unknown=None):
 
     return query.all()
 
-def employerInList(schoolList=[], unknown=None):
+def employerInList(employerList=[], unknown=None):
     """
     Queries the database for people who are between a certain age range
 
@@ -197,18 +200,33 @@ def orQuery(query1, query2):
     return final
 
 
-funcArray = [[collegeInList, "College" ,[["Illinois", "New York", "Boston"], ["Northwestern"]]], [collegeGradYear, "College Grad Year", [[1960, 1980], [1980,1990]]]]
 
 
-def buildTree(depth = 0, funcArray = [], query=[]):
-    print ("--"*depth) + "Size: " + str(len(query))
-    if depth < len(funcArray):
+
+# def buildTree(depth = 0, funcArray = [], query=[], printString = ""):
+#     line = ("--"*depth) + "Size: " + str(len(query))
+#     print line 
+#     f.write(line + "\n")
+#     if depth < len(funcArray) and (depth == 0 or len(query) > 0):
+#         for x in funcArray[depth][2]:
+#             line =  ("--"*depth) + funcArray[depth][1] + " = " + str(x)
+#             print line
+#             f.write(line+"\n")
+#             if depth ==0:
+#                 buildTree(depth +1, funcArray, funcArray[depth][0](x))
+#             else:
+#                 buildTree(depth +1, funcArray, andQuery(query, funcArray[depth][0](x)))
+        
+def buildTree(depth = 0, funcArray = [], query=[], printString = ""):
+    line = printString + " : " + str(len(query))
+    print line 
+    f.write(line + "\n")
+    if depth < len(funcArray) and (depth == 0 or len(query) > 0):
         for x in funcArray[depth][2]:
-            print ("--"*depth) + funcArray[depth][1] + " = " + str(x)
             if depth ==0:
-                buildTree(depth +1, funcArray, funcArray[depth][0](x))
+                buildTree(depth +1, funcArray, funcArray[depth][0](x), printString+str(x[0]))
             else:
-                buildTree(depth +1, funcArray, andQuery(query, funcArray[depth][0](x)))
+                buildTree(depth +1, funcArray, andQuery(query, funcArray[depth][0](x)), printString+", " + str(x[0]))
         
 
 
@@ -220,14 +238,32 @@ def permutations(istr, cstr, used_indices):
             result.extend(permutations(istr, cstr + [char], used_indices | {idx}))
     return result
 
+def fixQuote(x):
+    if x == "'":
+        return "\'"
+    else:
+        return x
 
 
+employArray= []
 
+with open('Employment.csv', 'rb') as c:
+    creader = csv.reader(c, delimiter=',')
+    firstLine = True
+    for row in creader:
+        if firstLine:
+            firstLine = False
+        else:    
+            for i in range(1,len(row)):
+                if row[i] != '':
+                    line = filter(lambda x: x != "'", row[i])
+                    if i>=len(employArray):
+                        employArray.append([line])
+                    else:
+                        employArray[i].append(line)
 
-
-perm = permutations(range(len(funcArray)) , [], set())
-
-
+funArray = [[employerInList, "Employer" , employArray], [birthday, "Age", [[15,24], [25,34], [35,44], [45, 54], [55, 64], [65, 200]]] , [sex, "Sex", ["m", "f", "o"]], [currentcity, "Current Location", [["Illinois"], ["New York"], ["California"]]]]
+perm = permutations([0, 1, 2, 3] , [], set())
+f = open("result.txt", 'w')
 for p in perm:
-    buildTree(funcArray=map(lambda x: funcArray[x], p))
-
+    buildTree(funcArray=map(lambda x: funArray[x], p))
