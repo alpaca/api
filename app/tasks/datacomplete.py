@@ -43,7 +43,7 @@ def find_fb_place_addrs():
 						db.session.merge(new_loc)
 						print new_loc.address
 			except GeocoderServiceError as ge:
-				print "Caught %s" % ge.strerror
+				print "Caught %s" % str(ge)
 		try:
 			db.session.commit()
 		except IntegrityError:
