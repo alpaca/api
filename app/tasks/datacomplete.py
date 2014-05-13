@@ -13,18 +13,21 @@ def find_fb_place_addrs():
                         FacebookUser.highschool.isnot(None)
                     )
                 ).all()
+	TYPES = ['college','highschool','currentcity','hometown']
 	for user in users:
-		print '[%s, %s]' % (user.college,user.highschool)
-		for idx,obj in enumerate([user.college,user.highschool]):
+		print '[%s, %s, %s, %s]' % (user.college,user.highschool,user.currentcity,user.hometown,)
+		for idx,obj in enumerate([user.college,user.highschool,user.currentcity,user.hometown]):
+			tp = TYPES[idx]
 			try:
 				if obj:
-					print obj
+					if obj == user.currentcity or obj == user.hometown:
+						obj = '{"' + obj + '":""}' # trolol
 					for name in ast.literal_eval(obj).keys():
 						loc_record = Location.query.filter_by(name=name.lower()).all()
 						if len(loc_record) > 0:
 							existing_loc = loc_record[0]
 							new_loc = Location(	name=existing_loc.name,
-												type = 'college' if idx == 0 else 'highschool',
+												type = tp,
 												address=existing_loc.address,
 												zipcode=existing_loc.zipcode,
 												latitude=existing_loc.latitude,
@@ -33,7 +36,7 @@ def find_fb_place_addrs():
 						else:
 							addr,zipcode,lat,lng = get_coords_for_place(name)
 							new_loc = Location(	name=name.lower(),
-												type = 'college' if idx == 0 else 'highschool',
+												type = tp,
 												address=addr,
 												zipcode=zipcode,
 												latitude=lat,
@@ -55,6 +58,24 @@ def find_fb_place_addrs():
 # zipcode = db.Column(db.Integer)
 # latitude = db.Column(db.Float)
 # longitude = db.Column(db.Float)
+
+def get_zipcode_for_cities():
+	locations_hometown = Location.query.filter_by(type='hometown').all()
+	locations_curcity = Location.query.filter_by(type='currentcity').all()
+	locations = locations_hometown + locations_curcity
+	
+	geolocator = GoogleV3()
+	regex = re.compile(r'[A-Z]{2} [0-9]{5},')
+
+	for location in locations:
+		addr,_ = geolocator.reverse((location.latitude,location.longitude))
+		try:
+			zipcode = regex.findall()[0].split(' ')[1].rstrip(',')
+			location.zipcode = zipcode
+			db.session.merge(location)
+			db.session.commit()
+		except KeyError:
+			pass
 
 def get_coords_for_place(place):
     regex = re.compile("[A-Z]{2} [0-9]{5},")
