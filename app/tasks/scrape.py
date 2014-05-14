@@ -38,7 +38,7 @@ def worker_init(*args, **kwargs):
 
     if not os.path.isfile('facebook_scraper.pickle'):
         facebook_scraper = FacebookScraper(scraper_type='nograph')
-        facebook_scraper.add_user(email=os.getenv('FACEBOOK_EMAIL'), password=os.getenv('FACEBOOK_PASSWORD'))
+        facebook_scraper.add_user(email=os.getenv('FACEBOOK_EMAIL'), password=os.getenv('FACEBOOK_PASSWORD'), id=os.getenv('FACEBOOK_USERID'), username=os.getenv('FACEBOOK_USERNAME'))
         facebook_scraper.pick_random_user()
         facebook_scraper.login()
         # facebook_scraper.init_api()
