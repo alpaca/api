@@ -129,12 +129,14 @@ def get_usernames(limit=None, get='all'):
             map(lambda user: user.username, 
                 FacebookUser.query.filter(
                     and_(
-                        FacebookUser.currentcity.isnot(None), 
-                        FacebookUser.hometown.isnot(None), 
-                        FacebookUser.college.isnot(None), 
-                        FacebookUser.highschool.isnot(None), 
-                        FacebookUser.employer.isnot(None), 
-                        FacebookUser.birthday.isnot(None),
+                        or_(
+                            FacebookUser.currentcity.isnot(None), 
+                            FacebookUser.hometown.isnot(None), 
+                            FacebookUser.college.isnot(None), 
+                            FacebookUser.highschool.isnot(None), 
+                            FacebookUser.employer.isnot(None), 
+                            FacebookUser.birthday.isnot(None),
+                        ),
                         FacebookUser.pages == None
                     )
                 ).limit(limit).all()
