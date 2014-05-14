@@ -31,10 +31,8 @@ https://github.com/shazow/urllib3/issues/384
 
 """
 
-@worker_init.connect
-def worker_init(*args, **kwargs):
-
-    # global facebook_scraper
+def manual_init():
+    global facebook_scraper
 
     if not os.path.isfile('facebook_scraper.pickle'):
         facebook_scraper = FacebookScraper(scraper_type='nograph')
@@ -43,8 +41,12 @@ def worker_init(*args, **kwargs):
         facebook_scraper.login()
         # facebook_scraper.init_api()
         pickle.dump(facebook_scraper, open('facebook_scraper.pickle', 'wb'))
-    # else:
-    #     facebook_scraper = pickle.load(open( "facebook_scraper.pickle", "rb" ))
+    else:
+        facebook_scraper = pickle.load(open( "facebook_scraper.pickle", "rb" ))
+
+@worker_init.connect
+def worker_init(*args, **kwargs):
+    manual_init()
 
 @celery.task()
 def get_uids(limit=None): 
@@ -53,7 +55,7 @@ def get_uids(limit=None):
 @celery.task()
 def get_usernames(limit=None, get='all'): 
 
-    # All Peopl
+    # All People
     if get == 'all':
         return filter(lambda username: username, map(lambda user: user.username, FacebookUser.query.limit(limit).all()))
 
@@ -166,7 +168,7 @@ def get_usernames(limit=None, get='all'):
 @celery.task()
 def get_about(username):
 
-    facebook_scraper = pickle.load(open( "facebook_scraper.pickle", "rb" ))
+    # facebook_scraper = pickle.load(open( "facebook_scraper.pickle", "rb" ))
     try:
         result = facebook_scraper.get_about(username)
         user = FacebookUser.query.filter_by(username=username).first()
@@ -216,8 +218,8 @@ def get_about(username):
 @celery.task
 def get_likes(username):
     
-    facebook_scraper = pickle.load(open( "facebook_scraper.pickle", "rb" ))
-    facebook_scraper.scraper_type = "nograph"
+    # facebook_scraper = pickle.load(open( "facebook_scraper.pickle", "rb" ))
+    # facebook_scraper.scraper_type = "nograph"
 
     user = FacebookUser.query.filter_by(username=username).first()
 
