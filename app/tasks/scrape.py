@@ -39,7 +39,7 @@ def manual_init():
         facebook_scraper.add_user(email=os.getenv('FACEBOOK_EMAIL'), password=os.getenv('FACEBOOK_PASSWORD'), id=os.getenv('FACEBOOK_USERID'), username=os.getenv('FACEBOOK_USERNAME'))
         facebook_scraper.pick_random_user()
         facebook_scraper.login()
-        # facebook_scraper.init_api()
+        facebook_scraper.init_api()
         pickle.dump(facebook_scraper, open('facebook_scraper.pickle', 'wb'))
     else:
         facebook_scraper = pickle.load(open( "facebook_scraper.pickle", "rb" ))

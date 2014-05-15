@@ -8,9 +8,9 @@ from .. import settings
 from celery import Celery
 
 import logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 requests_log = logging.getLogger("requests.packages.urllib3")
-requests_log.setLevel(logging.INFO)
+requests_log.setLevel(logging.DEBUG)
 requests_log.propagate = True
 
 def make_celery(flask_app):
