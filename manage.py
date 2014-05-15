@@ -52,6 +52,7 @@ BANNER = "Run the following commands: \n" + \
          "process_list = (scrape.get_usernames.s(get='empty') | scrape.dmap.s(scrape.get_about.s())) \n" + \
          "res = process_list() \n\n" + \
          "# reuse logged in facebook_scraper pickle \n" + \
+         "scrape.manual_init() \n" + \
          "facebook_scraper = pickle.load(open( 'facebook_scraper.pickle', 'rb' )) \n\n" + \
          "facebook_scraper = FacebookScraper(scraper_type='nograph') \n" + \
          "facebook_scraper.add_user(email=os.getenv('FACEBOOK_EMAIL'), password=os.getenv('FACEBOOK_PASSWORD'), id=os.getenv('FACEBOOK_USERID'), username=os.getenv('FACEBOOK_USERNAME')) \n" + \

@@ -165,8 +165,8 @@ def get_usernames(limit=None, get='all'):
 
 
 # change scraper_type from graphapi to nograph to see different results
-@celery.task()
-def get_about(username):
+@celery.task(bind=True)
+def get_about(self, username):
 
     # facebook_scraper = pickle.load(open( "facebook_scraper.pickle", "rb" ))
     try:
@@ -186,10 +186,13 @@ def get_about(username):
         user.updated_at = datetime.now()
     except Exception as e:
         transaction = Transaction(
-            timestamp = datetime.utcnow(),
-            transact_type = 'error',
-            func = 'get_about(%s)' % username,
-            ref = "%s: %s" % (str(e.errno), e.strerror)
+                timestamp = datetime.utcnow(),
+                transact_type = 'error',
+                func = 'get_about(%s)' % username,
+                ref = "%s: %s" % (
+                    str(e.errno) if hasattr(e, 'errno') else 0,
+                    e.strerror if hasattr(e, 'strerror') else e
+                )
             )
         if 'result' in locals():
             transaction.data = str(result)
@@ -215,8 +218,8 @@ def get_about(username):
 
     return result
 
-@celery.task
-def get_likes(username):
+@celery.task(bind=True)
+def get_likes(self, username):
     
     # facebook_scraper = pickle.load(open( "facebook_scraper.pickle", "rb" ))
     # facebook_scraper.scraper_type = "nograph"
@@ -241,16 +244,25 @@ def get_likes(username):
                 convert_result(page, result)
                 transact_type = 'update'
 
+            # logger.debug()
+            self.update_state(state='PROGRESS', meta={'transact_type': transact_type, 'current_result': result.username, 'current_total': len(results)})
+
         except Exception as e:
             transaction = Transaction(
-                timestamp = datetime.utcnow(),
-                transact_type = 'error',
-                func = 'get_likes(%s)' % username,
-                ref = "%s: %s" % (str(e.errno), e.strerror)
+                    timestamp = datetime.utcnow(),
+                    transact_type = 'error',
+                    func = 'get_likes(%s)' % username,
+                    ref = "%s: %s" % (
+                        str(e.errno) if hasattr(e, 'errno') else 0, 
+                        e.strerror if hasattr(e, 'strerror') else e
+                    )
                 )
             if 'result' in locals():
                 transaction.data = str(result)
-                
+
+            # logger.debug()
+            self.update_state(state='PROGRESS', meta={'transact_type': transact_type, 'current_result': result.username, 'current_total': len(results)})
+
             db.session.add(transaction)
             db.session.commit()
             return      
@@ -272,7 +284,7 @@ def get_likes(username):
         db.session.commit()
 
         results.append(result)
-        logger.info(result)
+        logger.info( "%s - %i - %s" % (username, len(results), result.username))
 
     return results
 

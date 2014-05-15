@@ -7,6 +7,12 @@ from .. import environment
 from .. import settings
 from celery import Celery
 
+import logging
+logging.basicConfig(level=logging.INFO)
+requests_log = logging.getLogger("requests.packages.urllib3")
+requests_log.setLevel(logging.INFO)
+requests_log.propagate = True
+
 def make_celery(flask_app):
 
 	"""
