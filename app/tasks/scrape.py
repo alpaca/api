@@ -54,12 +54,10 @@ def get_uids(limit=None):
 
 @celery.task()
 def get_usernames(limit=None, get='all', fname=None): 
+
     if get == 'file':
-        ret = []
-        with open(fname,'r') as f:
-            for line in f:
-                ret.append(line)
-            return ret
+        return open(fname).read().splitlines()
+
     # All People
     elif get == 'all':
         return filter(lambda username: username, map(lambda user: user.username, FacebookUser.query.limit(limit).all()))
@@ -167,7 +165,6 @@ def get_usernames(limit=None, get='all', fname=None):
                 ).limit(limit).all()
                 )
             )
-
 
 # change scraper_type from graphapi to nograph to see different results
 @celery.task(bind=True)
