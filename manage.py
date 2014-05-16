@@ -42,15 +42,17 @@ def shell_imports():
     import os, pickle, json, requests
     from socialscraper.facebook import FacebookScraper
     from socialscraper.twitter import TwitterScraper
-    from app.models import FacebookUser, FacebookPage
+    from app.models import __all__
+    for obj in __all__:
+        exec "from app.models import %s" % obj
     from app.tasks import scrape
 
     imports = {}
 
     for name, val in locals().items():
-        if name not in ['name','val','imports']:
+        if name not in ['name','val','imports','__all__']:
             imports[name] = eval(name)
-            
+
     return imports
 
 def _make_context():
