@@ -53,10 +53,15 @@ def get_uids(limit=None):
     return filter(lambda uid: uid, map(lambda user: user.uid, FacebookUser.query.limit(limit).all()))
 
 @celery.task()
-def get_usernames(limit=None, get='all'): 
-
+def get_usernames(limit=None, get='all', fname=None): 
+    if get == 'file':
+        ret = []
+        with open(fname,'r') as f:
+            for line in f:
+                ret.append(line)
+            return ret
     # All People
-    if get == 'all':
+    elif get == 'all':
         return filter(lambda username: username, map(lambda user: user.username, FacebookUser.query.limit(limit).all()))
 
     # People that have no pieces of about information

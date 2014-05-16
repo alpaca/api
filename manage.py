@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import division
 import sys, csv, os
 
 import logging
@@ -34,18 +34,30 @@ from app.models import FacebookUser, FacebookPage
 #         socketio.run(app, host=host, port=port)
 # manager.add_command("runserver", GeventSocketIOServer(host="0.0.0.0"))
 
-def _make_context():
-    return dict(app=app, db=db, models=models)
+import types
+def shell_imports():
 
-BANNER = "Run the following commands: \n" + \
-         "from __future__ import division \n" + \
-         "from sqlalchemy import and_, or_ \n" + \
-         "import os, pickle, json, requests \n" + \
-         "from socialscraper.facebook import FacebookScraper \n" + \
-         "from socialscraper.twitter import TwitterScraper \n" + \
-         "from app.models import * \n" + \
-         "from app.tasks import scrape \n\n" + \
-         "scrape.get_about() \n" + \
+    # add yer imports here
+    from sqlalchemy import and_, or_
+    import os, pickle, json, requests
+    from socialscraper.facebook import FacebookScraper
+    from socialscraper.twitter import TwitterScraper
+    from app.models import FacebookUser, FacebookPage
+    from app.tasks import scrape
+
+    imports = {}
+
+    for name, val in locals().items():
+        if name not in ['name','val','imports']:
+            imports[name] = eval(name)
+            
+    return imports
+
+def _make_context():
+    import_dic = shell_imports()
+    return dict(app=app, db=db, models=models, division=division, **import_dic)
+
+BANNER = "scrape.get_about() \n" + \
          "scrape.get_likes() \n\n" + \
          "scrape.get_about.delay() \n" + \
          "scrape.get_likes.delay() \n\n" + \
