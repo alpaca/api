@@ -44,7 +44,6 @@ def zipcode(zipcode, unknown=False):
 
     return filtr
 
-
 def likes(unknown=False):
     if unknown: filtr = FacebookUser.pages == None
     else: filtr = FacebookUser.pages != None
@@ -85,4 +84,16 @@ query = FacebookUser.query.filter(
 )
 print map(lambda user: (user.username, user.birthday, user.sex, user.currentcity, user.hometown), query.all())
 print "\n"
+
+# Example 4
+print "People who have zipcode 60201"
+query = FacebookUser.query.filter(
+    and_(
+        zipcode('60201')
+    )
+)
+print map(lambda user: (user.username, map(lambda location: (location.type, location.zipcode) ,user.locations)), query.all())
+print "\n"
+
+###################################################################
 
