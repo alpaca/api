@@ -285,5 +285,12 @@ def clear_rabbit():
     call(["rabbitmqctl", "reset"])
     call(["rabbitmqctl", "start_app"])
 
+@manager.command
+def sort_tree(fname):
+    rows = open('results2.txt').read().splitlines()
+    sorted_rows = sorted([(row, row.split(':')[-1]) for row in rows], key=lambda x: x[1], reverse=True)
+    sorted_rows = [row[0] for row in sorted_rows]
+    print "\n".join(sorted_rows)
+
 if __name__ == "__main__":
     manager.run()

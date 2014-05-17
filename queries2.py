@@ -264,7 +264,7 @@ def buildTree(depth = 0, funcArray = [], filters=None, printString = ""):
                     filters, 
                     funcArray[depth][0](unknown=True)
                 ), 
-                printString+", " + funcArray[depth][1] + ": Unknown" 
+                printString + ", " + funcArray[depth][1] + ": Unknown" 
             )
 
     elif length>0:
