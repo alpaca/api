@@ -202,16 +202,9 @@ funZipcode  = [zipcodeInList, "Zipcode", [readZip(), ["Illinois"]]]
 
 funArray = [funEmploy, funAge , funSex, funZipcode]
 
-###################################################################
+def buildTree(depth = 0, funcArray = [], filters=None, printString = ""):
 
-# Using funArray
-
-def buildTree(depth = 0, funcArray = [], filters=[], printString = ""):
-    # import pdb; pdb.set_trace()
-
-    # print filters
-    
-    if len(filters) > 0: 
+    if filters is not None: 
         users = FacebookUser.query.filter(filters).all()
         length = len(users)
     else: 
