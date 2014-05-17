@@ -280,4 +280,6 @@ def buildTree(depth = 0, funcArray = [], filters=None, printString = ""):
             line = str(q.uid) +": "+ bitstring
             # f2.write(line+"\n")
 
-buildTree(funcArray=funArray)
+for i in range(len(funArray)):
+    buildTree(funcArray=funArray[i:])
+
