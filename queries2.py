@@ -40,7 +40,7 @@ def city(city, unknown=False):
     return filtr
 
 def zipcode(zipcode, unknown=False):
-    filtr = FacebookUser.locations.any(zipcode=60093)
+    filtr = FacebookUser.locations.any(zipcode=zipcode)
 
     return filtr
 
