@@ -102,7 +102,7 @@ def likes(unknown=False):
 # Examples
 
 # Example 1
-print "Querying people of age 20 to 30"
+print "Example 1: Querying people of age 20 to 30"
 query = FacebookUser.query.filter(
             age(age=(20,30))
         )
@@ -110,7 +110,7 @@ print map(lambda user: (user.username, user.birthday), query.all())
 print "\n"
 
 # Example 2
-print "Querying people of age 20 to 30 who are male"
+print "Example 2: Querying people of age 20 to 30 who are male"
 query = FacebookUser.query.filter(
     and_(
         age(age=(20,30)),
@@ -121,7 +121,7 @@ print map(lambda user: (user.username, user.birthday, user.sex), query.all())
 print "\n"
 
 # Example 3
-print "Querying people of age 20 to 30 who are male and from evanston"
+print "Example 3: Querying people of age 20 to 30 who are male and from evanston"
 query = FacebookUser.query.filter(
     and_(
         age(age=(20,30)),
@@ -133,13 +133,27 @@ print map(lambda user: (user.username, user.birthday, user.sex, user.currentcity
 print "\n"
 
 # Example 4
-print "People who have zipcode 60201"
+print "Example 4: People who have zipcode 60201"
 query = FacebookUser.query.filter(
-    and_(
-        zipcode('60201')
-    )
+    zipcode('60201')
 )
 print map(lambda user: (user.username, map(lambda location: (location.type, location.zipcode) ,user.locations)), query.all())
+print "\n"
+
+# Example 5
+print "Example 5: People who's employer is microsoft"
+query = FacebookUser.query.filter(
+    employer('microsoft')
+)
+print map(lambda user: (user.username, user.employer), query.all())
+print "\n"
+
+# Example 6
+print "Example 6: People who's college is Northwestern"
+query = FacebookUser.query.filter(
+    college('northwestern')
+)
+print map(lambda user: (user.username, user.college), query.all())
 print "\n"
 
 print "------------------------------------------------------------"
