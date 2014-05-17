@@ -28,13 +28,6 @@ def birthday(age = [0, 10000], unknown=None):
     return query.all()
 
 def sex(sex=None, unknown=None):
-    """
-    Queries the database for people who are between a certain age range
-
-    Ignores all people who don't have a birth year set because their birth year is set to 2014 and the query will only query up to january 1st on the current year
-
-    """
-
     if unknown:
         query = FacebookUser.query.filter_by(sex=None)
     elif sex=='m':
@@ -49,12 +42,6 @@ def sex(sex=None, unknown=None):
     return query.all()
 
 def currentcity(cityList=[], unknown=None):
-    """
-    Queries the database for people who are between a certain age range
-
-    Ignores all people who don't have a birth year set because their birth year is set to 2014 and the query will only query up to january 1st on the current year
-
-    """
     if unknown:
         query = FacebookUser.query.filter_by(currentcity=None)
     elif(len(cityList) > 0):
@@ -77,12 +64,6 @@ def currentcity(cityList=[], unknown=None):
 
 
 def hometown(cityList=[], unknown=None):
-    """
-    Queries the database for people who are between a certain age range
-
-    Ignores all people who don't have a birth year set because their birth year is set to 2014 and the query will only query up to january 1st on the current year
-
-    """
     if unknown:
         query = FacebookUser.query.filter_by(hometown=None)
     elif(len(cityList)>0):
@@ -106,13 +87,6 @@ def hometown(cityList=[], unknown=None):
 
 
 def collegeInList(collegeList=[], unknown=None):
-    """
-    Queries the database for people who are between a certain age range
-
-    Ignores all people who don't have a birth year set because their birth year is set to 2014 and the query will only query up to january 1st on the current year
-
-    """
-
     if unknown:
         query = FacebookUser.query.filter_by(college=None)
     else:
@@ -125,12 +99,6 @@ def collegeInList(collegeList=[], unknown=None):
     return query.all()
 
 def collegeGradYear(years = [1000, 3000], unknown=None):
-    """
-    Queries the database for people who are between a certain age range
-
-    Ignores all people who don't have a birth year set because their birth year is set to 2014 and the query will only query up to january 1st on the current year
-
-    """
     minYear = years[0]
     maxYear = years[1]
     if unknown:
@@ -146,12 +114,6 @@ def collegeGradYear(years = [1000, 3000], unknown=None):
 
 
 def highSchoolGradYear(years = [1000, 3000], unknown=None):
-    """
-    Queries the database for people who are between a certain age range
-
-    Ignores all people who don't have a birth year set because their birth year is set to 2014 and the query will only query up to january 1st on the current year
-
-    """
     minYear = years[0]
     maxYear = years[1]
     if unknown:
@@ -166,13 +128,6 @@ def highSchoolGradYear(years = [1000, 3000], unknown=None):
     return query.all()
 
 def highSchoolInList(schoolList=[], unknown=None):
-    """
-    Queries the database for people who are between a certain age range
-
-    Ignores all people who don't have a birth year set because their birth year is set to 2014 and the query will only query up to january 1st on the current year
-
-    """
-
     if unknown:
         query = FacebookUser.query.filter_by(highschool=None)
     else:
@@ -185,12 +140,6 @@ def highSchoolInList(schoolList=[], unknown=None):
     return query.all()
 
 def employerInList(employerList=[], unknown=None):
-    """
-    Queries the database for people who are between a certain age range
-
-    Ignores all people who don't have a birth year set because their birth year is set to 2014 and the query will only query up to january 1st on the current year
-
-    """
     if unknown:
         query = FacebookUser.query.filter_by(employer=None)
     elif len(employerList)>0:
