@@ -5,13 +5,13 @@ from sqlalchemy import or_, and_
 from datetime import datetime
 from dateutil import parser
 
-def age(min_age=None, max_age=None, unknown=False):
+def age(mina=0, maxa=2000, unknown=False):
     if unknown: filtr = FacebookUser.birthday == None
     else:
         tNow = datetime.now()
         filtr = FacebookUser.birthday.between(
-                datetime(year=tNow.year-max_age, month=1, day=1), 
-                datetime(year=tNow.year-min_age,month=1, day=1)
+                datetime(year=tNow.year-maxa, month=1, day=1), 
+                datetime(year=tNow.year-mina,month=1, day=1)
             )
     
     return filtr
@@ -51,12 +51,38 @@ def likes(unknown=False):
 
     return filtr
 
+###################################################################
 
+# Examples
+
+# Example 1
+print "Querying people of age 20 to 30"
 query = FacebookUser.query.filter(
-    or_(
-        birthday(age=(20,30)),
+            age(mina=20, maxa=30)
+        )
+print map(lambda user: (user.username, user.birthday), query.all())
+print "\n"
+
+# Example 2
+print "Querying people of age 20 to 30 who are male"
+query = FacebookUser.query.filter(
+    and_(
+        age(mina=20, maxa=30),
         sex(sex='m')
     )
 )
+print map(lambda user: (user.username, user.birthday, user.sex), query.all())
+print "\n"
 
-print query.all()
+# Example 3
+print "Querying people of age 20 to 30 who are male and from evanston"
+query = FacebookUser.query.filter(
+    and_(
+        age(mina=20, maxa=30),
+        sex(sex='m'),
+        city('evanston')
+    )
+)
+print map(lambda user: (user.username, user.birthday, user.sex, user.currentcity, user.hometown), query.all())
+print "\n"
+
