@@ -209,6 +209,9 @@ def readZip():
                 zipArray.append(row[0])
     return zipArray
 
+
+# Still need read AGE, read LIKES
+
 funEmploy = [employerInList, "Employer" , readEmploy()]
 funAge = [age, "Age", [["15-24", 15,24], ["25-34", 25,34], ["35-44", 35,44], ["45-54", 45, 54], ["55-64", 55, 64], ["65+", 65, 200]]]
 funSex = [sex, "Sex", ["Mm", "Ff", "Oo"]]
