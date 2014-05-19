@@ -1,12 +1,12 @@
 [submodule "lib/socialscraper"]
 	path = lib/socialscraper
-	url = git@github.com:alpaca/socialscraper.git
+	url = https://github.com/alpaca/socialscraper.git
 	branch = master
 [submodule "lib/identityresolver"]
 	path = lib/identityresolver
-	url = https://github.com/alpaca/identityresolver
+	url = https://github.com/alpaca/identityresolver.git
 	branch = master
 [submodule "lib/contribscraper"]
 	path = lib/contribscraper
-	url = git@github.com:alpaca/contribscraper.git
+	url = https://github.com/alpaca/contribscraper.git
 	branch = master

@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from geopy.geocoders import GoogleV3,GeoNames
 from geopy.exc import GeocoderServiceError
 
-import heatmap
+# import heatmap
 
 import ast, re
 
@@ -115,25 +115,16 @@ def mark_donors(fname):
     db.session.commit()
     return
 
-def make_heatmap():
-    lower = (35.4748172441,-93.7086556875)
-    upper = (40.4703178606,-84.0625583187)
-    pts = []
-    locs = Location.query.filter_by(type='hometown').all()
-    for l in locs:
-        if l.latitude > lower[0] and l.latitude < upper[0]:
-            if l.longitude > lower[1] and l.longitude < upper[1]:
-                pts.append((l.latitude,l.longitude))
+# def make_heatmap():
+#     lower = (35.4748172441,-93.7086556875)
+#     upper = (40.4703178606,-84.0625583187)
+#     pts = []
+#     locs = Location.query.filter_by(type='hometown').all()
+#     for l in locs:
+#         if l.latitude > lower[0] and l.latitude < upper[0]:
+#             if l.longitude > lower[1] and l.longitude < upper[1]:
+#                 pts.append((l.latitude,l.longitude))
 
-    hm = heatmap.Heatmap()
-    img = hm.heatmap(pts, area = (lower,upper), dotsize=60, scheme='pgaitch')
-    img.save("heatmap.png")
-
-    # background = Image.open("map.png")
-    # overlay = Image.open("heatmap.png")
-
-    # background = background.convert("RGBA")
-    # overlay = overlay.convert("RGBA")
-
-    # new_img = Image.blend(background, overlay)#, 0.5)
-    # new_img.save("out_map.png","PNG")
+#     hm = heatmap.Heatmap()
+#     img = hm.heatmap(pts, area = (lower,upper), dotsize=60, scheme='pgaitch')
+#     img.save("heatmap.png")
