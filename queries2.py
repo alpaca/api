@@ -102,61 +102,62 @@ def likes(unknown=False):
 # Examples
 
 # Example 1
-print "Example 1: Querying people of age 20 to 30"
-query = FacebookUser.query.filter(
-            age(age=(20,30))
+if __name__ == "__main__":
+    print "Example 1: Querying people of age 20 to 30"
+    query = FacebookUser.query.filter(
+                age(age=(20,30))
+            )
+    print map(lambda user: (user.username, user.birthday), query.all())
+    print "\n"
+
+    # Example 2
+    print "Example 2: Querying people of age 20 to 30 who are male"
+    query = FacebookUser.query.filter(
+        and_(
+            age(age=(20,30)),
+            sex(sex='m')
         )
-print map(lambda user: (user.username, user.birthday), query.all())
-print "\n"
-
-# Example 2
-print "Example 2: Querying people of age 20 to 30 who are male"
-query = FacebookUser.query.filter(
-    and_(
-        age(age=(20,30)),
-        sex(sex='m')
     )
-)
-print map(lambda user: (user.username, user.birthday, user.sex), query.all())
-print "\n"
+    print map(lambda user: (user.username, user.birthday, user.sex), query.all())
+    print "\n"
 
-# Example 3
-print "Example 3: Querying people of age 20 to 30 who are male and from evanston"
-query = FacebookUser.query.filter(
-    and_(
-        age(age=(20,30)),
-        sex(sex='m'),
-        city('evanston')
+    # Example 3
+    print "Example 3: Querying people of age 20 to 30 who are male and from evanston"
+    query = FacebookUser.query.filter(
+        and_(
+            age(age=(20,30)),
+            sex(sex='m'),
+            city('evanston')
+        )
     )
-)
-print map(lambda user: (user.username, user.birthday, user.sex, user.currentcity, user.hometown), query.all())
-print "\n"
+    print map(lambda user: (user.username, user.birthday, user.sex, user.currentcity, user.hometown), query.all())
+    print "\n"
 
-# Example 4
-print "Example 4: People who have zipcode 60201"
-query = FacebookUser.query.filter(
-    zipcode('60201')
-)
-print map(lambda user: (user.username, map(lambda location: (location.type, location.zipcode) ,user.locations)), query.all())
-print "\n"
+    # Example 4
+    print "Example 4: People who have zipcode 60201"
+    query = FacebookUser.query.filter(
+        zipcode('60201')
+    )
+    print map(lambda user: (user.username, map(lambda location: (location.type, location.zipcode) ,user.locations)), query.all())
+    print "\n"
 
-# Example 5
-print "Example 5: People who's employer is microsoft"
-query = FacebookUser.query.filter(
-    employer('microsoft')
-)
-print map(lambda user: (user.username, user.employer), query.all())
-print "\n"
+    # Example 5
+    print "Example 5: People who's employer is microsoft"
+    query = FacebookUser.query.filter(
+        employer('microsoft')
+    )
+    print map(lambda user: (user.username, user.employer), query.all())
+    print "\n"
 
-# Example 6
-print "Example 6: People who's college is Northwestern"
-query = FacebookUser.query.filter(
-    college('northwestern')
-)
-print map(lambda user: (user.username, user.college), query.all())
-print "\n"
+    # Example 6
+    print "Example 6: People who's college is Northwestern"
+    query = FacebookUser.query.filter(
+        college('northwestern')
+    )
+    print map(lambda user: (user.username, user.college), query.all())
+    print "\n"
 
-print "------------------------------------------------------------"
+    print "------------------------------------------------------------"
 
 ###################################################################
 
@@ -208,16 +209,6 @@ def readZip():
             else:    
                 zipArray.append(row[0])
     return zipArray
-
-
-# Still need read AGE, read LIKES
-
-funEmploy = [employerInList, "Employer" , readEmploy()]
-funAge = [age, "Age", [["15-24", 15,24], ["25-34", 25,34], ["35-44", 35,44], ["45-54", 45, 54], ["55-64", 55, 64], ["65+", 65, 200]]]
-funSex = [sex, "Sex", ["Mm", "Ff", "Oo"]]
-funZipcode  = [zipcodeInList, "Zipcode", [readZip(), ["Illinois"]]]
-
-funArray = [funEmploy, funAge , funSex, funZipcode]
 
 def buildTree(depth = 0, funcArray = [], filters=None, printString = ""):
 
@@ -282,7 +273,14 @@ def buildTree(depth = 0, funcArray = [], filters=None, printString = ""):
                 bitstring += "0"*pos + "1"+ ("0"*(len(cats)-pos-1))
             line = str(q.uid) +": "+ bitstring
             # f2.write(line+"\n")
+# Still need read AGE, read LIKES
+if __name__ == "__main__":
+    funEmploy = [employerInList, "Employer" , readEmploy()]
+    funAge = [age, "Age", [["15-24", 15,24], ["25-34", 25,34], ["35-44", 35,44], ["45-54", 45, 54], ["55-64", 55, 64], ["65+", 65, 200]]]
+    funSex = [sex, "Sex", ["Mm", "Ff", "Oo"]]
+    funZipcode  = [zipcodeInList, "Zipcode", [readZip(), ["Illinois"]]]
 
-for i in range(len(funArray)):
-    buildTree(funcArray=funArray[i:])
+    funArray = [funEmploy, funAge , funSex, funZipcode]
 
+    for i in range(len(funArray)):
+        buildTree(funcArray=funArray[i:])
