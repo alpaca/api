@@ -1,4 +1,4 @@
-"""empty message
+"""Add zipcode to boe_contributors.
 
 Revision ID: 259bedf52cb2
 Revises: 348a19576ac8

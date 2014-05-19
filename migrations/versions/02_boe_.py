@@ -1,4 +1,4 @@
-"""empty message
+"""Create boe_contributors and boe_democratic_committees tables.
 
 Revision ID: 254affa19b81
 Revises: 4d90654cb043

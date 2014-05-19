@@ -23,12 +23,13 @@ class BaseModel(object):
 from ..utils import get_model_properties
 from socialscraper import facebook, twitter
 
+
 FacebookUser = type('FacebookUser', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookUser))
-# FacebookFamily = type('FacebookFamily', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookFamily))
-# FacebookLocation = type('FacebookLocation', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookLocation))
-# FacebookFriend = type('FacebookFriend', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookFriend))
+FacebookFamily = type('FacebookFamily', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookFamily))
+FacebookLocation = type('FacebookLocation', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookLocation))
+FacebookFriend = type('FacebookFriend', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookFriend))
 FacebookPage = type('FacebookPage', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookPage))
-# FacebookStatus = type('FacebookStatus', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookStatus))
+FacebookStatus = type('FacebookStatus', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookStatus))
 FacebookPagesUsers = type('FacebookPagesUsers', (db.Model, BaseModel), get_model_properties(facebook.models.FacebookPagesUsers))
 
 TwitterUser = type('TwitterUser', (twitter.models.TwitterUser, db.Model, BaseModel), get_model_properties(twitter.models.TwitterUser))
