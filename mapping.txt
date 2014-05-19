@@ -1,0 +1,25 @@
+curl -XPUT http://localhost:9200/alpaca -d '
+{
+    "mappings": {
+        "_default_": {
+            "properties": {
+                "username" : {"type": "string" },
+                "uid": {"type": "integer"},
+                "locale": {"type": "string"},
+                "hometown": {"type": "string"},
+                "created_at": {"type": "date"},
+                "updated_at": {"type": "date"},
+                "sex": {"type": "string"},
+                "currentcity": {"type": "string"},
+                "birthday": {"type": "date"},
+                "college": {"type": "string"},
+                "highschool": {"type": "string"},
+                "employer": {"type": "string"},
+                "email": {"type": "string"},
+                "profile_url": {"type": "string"},
+                "name": {"type": "string"}
+            }
+        }
+    }
+}
+';

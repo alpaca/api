@@ -1,4 +1,4 @@
-"""empty message
+"""Create facebook_users, facebook_pages, facebook_pages_users, twitter_users, twitter_tweets, transactions tables.
 
 Revision ID: 26d94a184169
 Revises: None
