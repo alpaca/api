@@ -16,7 +16,8 @@ class BaseModel(object):
     def to_json(self):
         d = {}
         for column in self.__table__.columns:
-            d[column.name] = unicode(getattr(self, column.name))
+            val = getattr(self, column.name)
+            d[column.name] = val
         return d
 
 from ..utils import get_model_properties
