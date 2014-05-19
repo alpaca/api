@@ -42,6 +42,9 @@ dokku run api python manage.py db upgrade
 wget https://dl.dropboxusercontent.com/u/2623300/alpaca_api_development.text.backup
 dokku postgresql:restore api < alpaca_api_development.text.backup
 
+dokku postgresql:info api
+dokku run api psql db --host=172.17.42.1 --port=xxxx --username=root --password
+
 dokku run api python manage.py shell
 
 
@@ -57,3 +60,7 @@ pg_dump -a -inserts --table="facebook_users" alpaca_api_development  --schema=pu
 pg_dump -a -inserts --table="facebook_pages_users" alpaca_api_development  --schema=public > facebook_pages_users.text.backup
 
 ```
+
+Analyzing Stuff with iPython
+-----------------------------
+http://nbviewer.ipython.org/github/jrjohansson/scientific-python-lectures/blob/master/Lecture-4-Matplotlib.ipynb

@@ -1,4 +1,4 @@
-"""empty message
+"""Create locations table.
 
 Revision ID: 54da8d9c724f
 Revises: 41c833dfc70d

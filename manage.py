@@ -78,8 +78,8 @@ BANNER = "scrape.get_about() \n" + \
          "scrape.get_likes.delay() \n" + \
          "process_list = (scrape.get_usernames.s(get='empty') | scrape.dmap.s(scrape.get_about.s())) \n" + \
          "process_list = (scrape.get_usernames.s(get='nonempty_and_nolikes') | scrape.dmap.s(scrape.get_likes.s())) \n" + \
-         "len(map(lambda user: user.username, FacebookUser.query.filter(FacebookUser.pages != None))) \n" + \
-         "len(map(lambda page: page.username, FacebookPage.query.all())) \n" + \
+         "FacebookUser.query.filter(FacebookUser.pages != None).count() \n" + \
+         "FacebookPage.query.count() \n" + \
          "res = process_list() \n\n" + \
          "from app.tasks import datacomplete \n" + \
          "datacomplete.find_fb_place_addrs() \n"

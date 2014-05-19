@@ -1,4 +1,4 @@
-"""empty message
+"""Add latitute and longitude to boe_contributors.
 
 Revision ID: 348a19576ac8
 Revises: 254affa19b81
