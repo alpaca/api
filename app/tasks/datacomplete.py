@@ -104,6 +104,17 @@ def get_coords_for_place(place):
         zipcode = 0
     return address, zipcode, lat, lng
 
+def mark_donors(fname):
+    uids = []
+    with open(fname,'r') as f:
+        for line in f:
+            uids.append(int(line.rstrip(' \n').lstrip(' \n')))
+
+    for user in FacebookUser.query:
+        user.donor = 1 if user.uid in uids else 0
+    db.session.commit()
+    return
+
 def make_heatmap():
     lower = (35.4748172441,-93.7086556875)
     upper = (40.4703178606,-84.0625583187)
