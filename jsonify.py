@@ -48,11 +48,18 @@ def jsonify(fname, limit=None):
                     FacebookUser.employer.isnot(None), 
                     FacebookUser.birthday.isnot(None),
                 ),
-                FacebookUser.pages != None
+                FacebookUser.pages != None,
+                FacebookUser.locations != None
             )
 
     for user in FacebookUser.query.filter(filtr).limit(limit):
         js = user.to_json()
+
+        # customize json
+
+        for loc in js.get('locations'):
+            loc['latlong'] = (loc['longitude'], loc['latitude'])
+
         js = del_none(js)
         print json.dumps(js, default=default)
         f.write('{"index":{"_index":"alpaca","_type":"user","_id":%i}} \n' % js['uid'])

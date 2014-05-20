@@ -4,7 +4,7 @@ curl -XPUT http://localhost:9200/alpaca -d '
         "_default_": {
             "properties": {
                 "username" : {"type": "string" },
-                "uid": {"type": "integer"},
+                "uid": {"type": "long"},
                 "locale": {"type": "string"},
                 "hometown": {"type": "string"},
                 "created_at": {"type": "date"},
