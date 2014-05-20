@@ -22,6 +22,7 @@ Workon Alpaca
 workon alpaca
 git pull 
 git submodule update --recursive
+source .secret
 ```
 
 Deploy Dokku
