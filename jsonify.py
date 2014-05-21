@@ -44,7 +44,7 @@ def jsonify(fname, limit=None):
         bitvectors = bitvectorify()
         pickle.dump(bitvectors, open('bitvectors.pickle', 'wb'))
     else:
-        pickle.load(open( "bitvectors.pickle", "rb" ))
+        bitvectors = pickle.load(open( "bitvectors.pickle", "rb" ))
 
     # Empty file
     f = open(fname,'w')
