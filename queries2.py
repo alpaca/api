@@ -253,95 +253,106 @@ def readZip():
                 zipArray.append(row[0])
     return [zipArray[0]] + map(int, zipArray[1:])
 
+if __name__ == "__main__":
 
-# Still need read AGE, read LIKES
+    """
+    Example Usage of Dynamic Queries
+    --------------------------------
+    query = FacebookUser.query.filter(age(age=(20,30)))
+    query = FacebookUser.query.filter(and_(age(age=(20,30)),sex('m')))
+    query = FacebookUser.query.filter(and_(age(age=(20,30)),sex('m'),currentcity('evanston')))
+    query = FacebookUser.query.filter(zipcode('60201'))
+    query = FacebookUser.query.filter(employer('microsoft'))
+    query = FacebookUser.query.filter(college('northwestern'))
+    """
 
-funEmploy = [employerInList, "Employer" , readEmploy()]
-funAge = [age, "Age", [["15-24", 15,24], ["25-34", 25,34], ["35-44", 35,44], ["45-54", 45, 54], ["55-64", 55, 64], ["65+", 65, 200]]]
-funSex = [sex, "Sex", ["Mm", "Ff", "Oo"]]
-funCurrentCity  = [currentCityInList, "Current City", [readZip(), ["Illinois", "Illinois"]]]
-funHometown  = [hometownInList, "Hometown", [readZip(), ["Illinois", "Illinois"]]]
-funHighSchool = [highSchoolInList, "High School", [readZip(), ["Illinois", "Illinois"]]]
-funCollege = [collegeInList, "College", [readZip(), ["Illinois", "Illinois"]]]
+    # Still need read AGE, read LIKES
 
-uDict = dict()
-funArray = [funEmploy, funAge , funSex, funCurrentCity, funHometown, funHighSchool, funCollege]
+    funEmploy = [employerInList, "Employer" , readEmploy()]
+    funAge = [age, "Age", [["15-24", 15,24], ["25-34", 25,34], ["35-44", 35,44], ["45-54", 45, 54], ["55-64", 55, 64], ["65+", 65, 200]]]
+    funSex = [sex, "Sex", ["Mm", "Ff", "Oo"]]
+    funCurrentCity  = [currentCityInList, "Current City", [readZip(), ["Illinois", "Illinois"]]]
+    funHometown  = [hometownInList, "Hometown", [readZip(), ["Illinois", "Illinois"]]]
+    funHighSchool = [highSchoolInList, "High School", [readZip(), ["Illinois", "Illinois"]]]
+    funCollege = [collegeInList, "College", [readZip(), ["Illinois", "Illinois"]]]
 
-def binOr(x,y):
-    return bin(int(x,2)|int(y,2))[2:]
+    uDict = dict()
+    funArray = [funEmploy, funAge , funSex, funCurrentCity, funHometown, funHighSchool, funCollege]
 
-def buildTree(depth = 0, funcArray = [], filters=None, printString = ""):
+    def binOr(x,y):
+        return bin(int(x,2)|int(y,2))[2:]
 
-    if filters is not None: 
-        users = FacebookUser.query.filter(filters).all()
-        length = len(users)
-    else: 
-        users = []
-        length = 0
+    def buildTree(depth = 0, funcArray = [], filters=None, printString = ""):
 
-    line = printString + " : " + str(length)
-    print line 
-    # f.write(line + "\n")
+        if filters is not None: 
+            users = FacebookUser.query.filter(filters).all()
+            length = len(users)
+        else: 
+            users = []
+            length = 0
 
-    if depth < len(funcArray):
+        line = printString + " : " + str(length)
+        print line 
+        # f.write(line + "\n")
 
-        if depth == 0:
+        if depth < len(funcArray):
 
-            for x in funcArray[depth][2]:
+            if depth == 0:
+
+                for x in funcArray[depth][2]:
+                    buildTree(
+                        depth + 1, 
+                        funcArray, 
+                        funcArray[depth][0](x[1:]), 
+                        funcArray[depth][1] + ": " + str(x[0])
+                    )
+
                 buildTree(
-                    depth + 1, 
+                    depth +1, 
                     funcArray, 
-                    funcArray[depth][0](x[1:]), 
-                    funcArray[depth][1] + ": " + str(x[0])
+                    funcArray[depth][0](unknown=True), 
+                    funcArray[depth][1] + ": Unknown" 
                 )
 
-            buildTree(
-                depth +1, 
-                funcArray, 
-                funcArray[depth][0](unknown=True), 
-                funcArray[depth][1] + ": Unknown" 
-            )
+            else:
 
-        else:
+                for x in funcArray[depth][2]:   
+                    buildTree(depth +1, funcArray, 
+                        and_(
+                            filters, 
+                            funcArray[depth][0](x[1:])
+                        ), 
+                        printString + ", " + funcArray[depth][1] + ": " + str(x[0])
+                    )
 
-            for x in funcArray[depth][2]:   
                 buildTree(depth +1, funcArray, 
                     and_(
                         filters, 
-                        funcArray[depth][0](x[1:])
+                        funcArray[depth][0](unknown=True)
                     ), 
-                    printString + ", " + funcArray[depth][1] + ": " + str(x[0])
+                    printString + ", " + funcArray[depth][1] + ": Unknown" 
                 )
 
-            buildTree(depth +1, funcArray, 
-                and_(
-                    filters, 
-                    funcArray[depth][0](unknown=True)
-                ), 
-                printString + ", " + funcArray[depth][1] + ": Unknown" 
-            )
-
-    elif length>0:
-        # print printString + " Count : " + str(length)
-        
-        bitstring = ""
-        for i in range(len(funcArray)):
-            seg = printString.split(",")[i]
-            cat = seg.split(":")[1][1:]
-            cats = map(lambda x: x[0], funcArray[i][2])+["Unknown"]
-            pos = cats.index(cat)
-            bitstring += "0"*pos + "1"+ ("0"*(len(cats)-pos-1))
-        for q in users:
-            if q.uid in uDict:
-                uDict[q.uid]= binOr(bitstring, uDict[q.uid])
-            else:
-                uDict[q.uid]= bitstring
+        elif length>0:
+            # print printString + " Count : " + str(length)
+            
+            bitstring = ""
+            for i in range(len(funcArray)):
+                seg = printString.split(",")[i]
+                cat = seg.split(":")[1][1:]
+                cats = map(lambda x: x[0], funcArray[i][2])+["Unknown"]
+                pos = cats.index(cat)
+                bitstring += "0"*pos + "1"+ ("0"*(len(cats)-pos-1))
+            for q in users:
+                if q.uid in uDict:
+                    uDict[q.uid]= binOr(bitstring, uDict[q.uid])
+                else:
+                    uDict[q.uid]= bitstring
 
 
-# print len(readEmploy())
-# for i in range(len(funArray)):
-f2 = open("bitarrays.txt", 'w')
-buildTree(funcArray=funArray[0:])
-for uid, bitstring in uDict.items():
-    f2.write(str(uid) + ":" + bitstring)
-
+    # print len(readEmploy())
+    # for i in range(len(funArray)):
+    f2 = open("bitarrays.txt", 'w')
+    buildTree(funcArray=funArray[0:])
+    for uid, bitstring in uDict.items():
+        f2.write(str(uid) + ":" + bitstring)
