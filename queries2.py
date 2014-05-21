@@ -183,6 +183,9 @@ def hometownInList(cityList=[], unknown=False):
 def highSchoolInList(schoolList=[], unknown=False):
     if unknown: filtr = highschool(unknown=True)
     elif len(schoolList) <1: filtr= None
+    elif type(schoolList[0]) == int:
+        or_list = [zipcode(x, "highschool") for x in schoolList]
+        filtr = or_(*or_list)
     else:
         or_list = [highschool(x) for x in schoolList]
         filtr = or_(*or_list)
@@ -191,10 +194,14 @@ def highSchoolInList(schoolList=[], unknown=False):
 def collegeInList(schoolList=[], unknown=False):
     if unknown: filtr = college(unknown=True)
     elif len(schoolList) <1: filtr= None
+    elif type(schoolList[0]) == int:
+        or_list = [zipcode(x, "college") for x in schoolList]
+        filtr = or_(*or_list)
     else:
         or_list = [college(x) for x in schoolList]
         filtr = or_(*or_list)
     return filtr
+
 
 def age(age = [0, 10000], unknown=False):
     if unknown: filtr = FacebookUser.birthday == None
@@ -232,7 +239,7 @@ def readEmploy():
                             employArray.append([line])
                         else:
                             employArray[i-1].append(line)
-    return employArray
+    return filter(lambda x: len(x)>0, employArray)
 
 def readZip():
     zipArray= []
@@ -254,8 +261,14 @@ funAge = [age, "Age", [["15-24", 15,24], ["25-34", 25,34], ["35-44", 35,44], ["4
 funSex = [sex, "Sex", ["Mm", "Ff", "Oo"]]
 funCurrentCity  = [currentCityInList, "Current City", [readZip(), ["Illinois", "Illinois"]]]
 funHometown  = [hometownInList, "Hometown", [readZip(), ["Illinois", "Illinois"]]]
+funHighSchool = [highSchoolInList, "High School", [readZip(), ["Illinois", "Illinois"]]]
+funCollege = [collegeInList, "College", [readZip(), ["Illinois", "Illinois"]]]
 
-funArray = [funEmploy, funAge , funSex, funCurrentCity, funHometown]
+uDict = dict()
+funArray = [funEmploy, funAge , funSex, funCurrentCity, funHometown, funHighSchool, funCollege]
+
+def binOr(x,y):
+    return bin(int(x,2)|int(y,2))[2:]
 
 def buildTree(depth = 0, funcArray = [], filters=None, printString = ""):
 
@@ -270,7 +283,7 @@ def buildTree(depth = 0, funcArray = [], filters=None, printString = ""):
     print line 
     # f.write(line + "\n")
 
-    if depth < len(funcArray) and (depth == 0 or length > 0):
+    if depth < len(funcArray):
 
         if depth == 0:
 
@@ -310,17 +323,25 @@ def buildTree(depth = 0, funcArray = [], filters=None, printString = ""):
 
     elif length>0:
         # print printString + " Count : " + str(length)
+        
+        bitstring = ""
+        for i in range(len(funcArray)):
+            seg = printString.split(",")[i]
+            cat = seg.split(":")[1][1:]
+            cats = map(lambda x: x[0], funcArray[i][2])+["Unknown"]
+            pos = cats.index(cat)
+            bitstring += "0"*pos + "1"+ ("0"*(len(cats)-pos-1))
         for q in users:
-            bitstring = ""
-            for i in range(len(funcArray)):
-                seg = printString.split(",")[i]
-                cat = seg.split(":")[1][1:]
-                cats = map(lambda x: x[0], funcArray[i][2])+["Unknown"]
-                pos = cats.index(cat)
-                bitstring += "0"*pos + "1"+ ("0"*(len(cats)-pos-1))
-            line = str(q.uid) +": "+ bitstring
-            # f2.write(line+"\n")
+            if q.uid in uDict:
+                uDict[q.uid]= binOr(bitstring, uDict[q.uid])
+            else:
+                uDict[q.uid]= bitstring
 
-for i in range(len(funArray)):
-    buildTree(funcArray=funArray[i:])
+
+# print len(readEmploy())
+# for i in range(len(funArray)):
+f2 = open("bitarrays.txt", 'w')
+buildTree(funcArray=funArray[0:])
+for uid, bitstring in uDict.items():
+    f2.write(str(uid) + ":" + bitstring)
 
