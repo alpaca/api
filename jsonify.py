@@ -1,6 +1,8 @@
 from app.models import *
 import sys, json
 
+from sqlalchemy import and_, or_
+
 def default(obj):
     """Default JSON serializer."""
     import calendar, datetime
@@ -37,8 +39,27 @@ def jsonify(fname, limit=None):
 
     f = open(fname,'a')
 
-    for user in FacebookUser.query.limit(limit):
+    filtr = and_(
+                or_(
+                    FacebookUser.currentcity.isnot(None), 
+                    FacebookUser.hometown.isnot(None), 
+                    FacebookUser.college.isnot(None), 
+                    FacebookUser.highschool.isnot(None), 
+                    FacebookUser.employer.isnot(None), 
+                    FacebookUser.birthday.isnot(None),
+                ),
+                FacebookUser.pages != None,
+                FacebookUser.locations != None
+            )
+
+    for user in FacebookUser.query.filter(filtr).limit(limit):
         js = user.to_json()
+
+        # customize json
+
+        for loc in js.get('locations'):
+            loc['latlong'] = (loc['longitude'], loc['latitude'])
+
         js = del_none(js)
         print json.dumps(js, default=default)
         f.write('{"index":{"_index":"alpaca","_type":"user","_id":%i}} \n' % js['uid'])

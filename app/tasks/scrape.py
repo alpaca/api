@@ -9,6 +9,7 @@ from socialscraper.twitter import TwitterScraper
 from socialscraper.facebook import FacebookScraper
 
 from sqlalchemy import or_, and_
+from sqlalchemy.exc import DatabaseError, OperationalError
 
 from datetime import datetime
 
@@ -223,10 +224,40 @@ def get_about(self, username):
 @celery.task(bind=True)
 def get_likes(self, username):
     
-    # facebook_scraper = pickle.load(open( "facebook_scraper.pickle", "rb" ))
-    # facebook_scraper.scraper_type = "nograph"
+    # TODO: move this to FacebookUser model
+    #
+    # from sqlalchemy.exc import DatabaseError, OperationalError
+    #
+    # retries method on DatabaseError or OperationalError
+    # def retry(fun):
+    #     @wraps(fun)
+    #     def _inner(*args, **kwargs):
+    #         max_retries = kwargs.pop('max_retries', 3)
+    #         for retries in xrange(max_retries + 1):
+    #             try:
+    #                 return fun(*args, **kwargs)
+    #             except (DatabaseError, OperationalError):
+    #                 if retries + 1 > max_retries:
+    #                     raise
+    #     return _inner
+    #
+    # @retry
+    # def get(username_or_uid):
+    #   if type(username_or_uid) == int:
+    #       return FacebookUser.query.get(username_or_uid)
+    #   elif type(username_or_uid) == str:
+    #       return FacebookUser.query.filter_by(username=username).first()
+    #   else:
+    #       raise
 
-    user = FacebookUser.query.filter_by(username=username).first()
+    max_retries = 3
+    for retries in xrange(max_retries + 1):
+        try:
+            user = FacebookUser.query.filter_by(username=username).first()
+            break
+        except (DatabaseError, OperationalError):
+            if retries + 1 > max_retries:
+                raise
 
     if not user: raise Exception("scrape the dude's about information first plz")
 
