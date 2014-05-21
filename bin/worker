@@ -5,7 +5,7 @@ if [ "$FLASK_ENV" == "production" ]; then
     # concurrent worker: 
     celery worker -A app.tasks --loglevel=INFO -b=$BROKER_URL --concurrency=20 --pool=gevent
 else
-    BROKER_URL=${RABBITMQ_URL:-"amqp://guest:guest@localhost//"}
+    BROKER_URL=${BROKER_URL:-"amqp://guest:guest@localhost//"}
     # celery worker -A app.tasks --loglevel=DEBUG -b=$BROKER_URL
     # concurrent worker: 
     celery worker -A app.tasks --loglevel=INFO -b=$BROKER_URL --concurrency=20 --pool=gevent
