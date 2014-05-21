@@ -3,6 +3,8 @@ import sys, json
 
 from sqlalchemy import and_, or_
 
+from queries2 import funArray as funcArray
+
 def default(obj):
     """Default JSON serializer."""
     import calendar, datetime
@@ -33,6 +35,14 @@ def del_none(d):
 
 def jsonify(fname, limit=None):
 
+    rows = open('bitarrays.txt').read().splitlines()
+    bitvectors = {}
+
+    for row in rows:
+        print row
+        user, vector = row.split(':')
+        bitvectors[user] = vector
+
     # Empty file
     f = open(fname,'w')
     f.close()
@@ -60,8 +70,19 @@ def jsonify(fname, limit=None):
         for loc in js.get('locations'):
             loc['latlong'] = (loc['longitude'], loc['latitude'])
 
+        print user.username, bitvectors[user.uid]
+        
+        js['is_retired'] = bitvectors[user.uid][0]
+        
+
+        # bitstring = ""
+        # for func, name, inputs in funcArray:
+        #     for inpt in inputs:
+        #         filtr = func(inpt[1:])
+        #         print user.username, user, name, inpt[0], FacebookUser.query.filter(filtr).count()
+
         js = del_none(js)
-        print json.dumps(js, default=default)
+        # print json.dumps(js, default=default)
         f.write('{"index":{"_index":"alpaca","_type":"user","_id":%i}} \n' % js['uid'])
         json.dump(js, f, default=default)
         f.write('\n')
