@@ -253,6 +253,20 @@ def readZip():
                 zipArray.append(row[0])
     return [zipArray[0]] + map(int, zipArray[1:])
 
+
+# Still need read AGE, read LIKES
+
+funEmploy = [employerInList, "Employer" , readEmploy()]
+funAge = [age, "Age", [["15-24", 15,24], ["25-34", 25,34], ["35-44", 35,44], ["45-54", 45, 54], ["55-64", 55, 64], ["65+", 65, 200]]]
+funSex = [sex, "Sex", ["Mm", "Ff", "Oo"]]
+funCurrentCity  = [currentCityInList, "Current City", [readZip(), ["Illinois", "Illinois"]]]
+funHometown  = [hometownInList, "Hometown", [readZip(), ["Illinois", "Illinois"]]]
+funHighSchool = [highSchoolInList, "High School", [readZip(), ["Illinois", "Illinois"]]]
+funCollege = [collegeInList, "College", [readZip(), ["Illinois", "Illinois"]]]
+
+uDict = dict()
+funArray = [funEmploy, funAge , funSex, funCurrentCity, funHometown, funHighSchool, funCollege]
+
 if __name__ == "__main__":
 
     """
@@ -265,19 +279,6 @@ if __name__ == "__main__":
     query = FacebookUser.query.filter(employer('microsoft'))
     query = FacebookUser.query.filter(college('northwestern'))
     """
-
-    # Still need read AGE, read LIKES
-
-    funEmploy = [employerInList, "Employer" , readEmploy()]
-    funAge = [age, "Age", [["15-24", 15,24], ["25-34", 25,34], ["35-44", 35,44], ["45-54", 45, 54], ["55-64", 55, 64], ["65+", 65, 200]]]
-    funSex = [sex, "Sex", ["Mm", "Ff", "Oo"]]
-    funCurrentCity  = [currentCityInList, "Current City", [readZip(), ["Illinois", "Illinois"]]]
-    funHometown  = [hometownInList, "Hometown", [readZip(), ["Illinois", "Illinois"]]]
-    funHighSchool = [highSchoolInList, "High School", [readZip(), ["Illinois", "Illinois"]]]
-    funCollege = [collegeInList, "College", [readZip(), ["Illinois", "Illinois"]]]
-
-    uDict = dict()
-    funArray = [funEmploy, funAge , funSex, funCurrentCity, funHometown, funHighSchool, funCollege]
 
     def binOr(x,y):
         return bin(int(x,2)|int(y,2))[2:]
@@ -355,4 +356,4 @@ if __name__ == "__main__":
     f2 = open("bitarrays.txt", 'w')
     buildTree(funcArray=funArray[0:])
     for uid, bitstring in uDict.items():
-        f2.write(str(uid) + ":" + bitstring)
+        f2.write(str(uid) + ":" + bitstring + "\n")
