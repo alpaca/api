@@ -204,7 +204,17 @@ def collegeInList(schoolList=[], unknown=False):
 
 
 def age(age = [0, 10000], unknown=False):
-    if unknown: filtr = FacebookUser.birthday == None
+    if unknown: 
+
+        # TODO: relfect the collegeinList highschoolinList stuff
+        # essentially, if the collegeinlist and highschoolinlist
+        # does not have "Clss of XXXX", then it also counts as
+        # an unknown age?? Something like that.
+
+        filtr = or_(
+            FacebookUser.birthday == None
+        )
+
     else:
         min_age = age[0]
         max_age = age[1]        

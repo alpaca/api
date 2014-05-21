@@ -55,7 +55,7 @@ def bitvectorify():
             else:
                 allUsers[user.uid] += '0'
 
-    import pdb; pdb.set_trace()    
+    return allUsers
 
 if __name__ == "__main__":
 
