@@ -9,9 +9,11 @@ def bitvectorify2():
 
     users = {}
 
-    def thing(user, stuff=None, unknown=False):
+    def thing(user, inpt=None, unknown=False):
         user_query = FacebookUser.query.offset(i).limit(1)
         user_subquery = user_query.subquery()
+
+        stuff = inpt[1:] if inpt else None
 
         user = user_query.first()
         filtr = func(stuff,unknown)
@@ -28,8 +30,8 @@ def bitvectorify2():
     for i in range(FacebookUser.query.count()):
         for func, name, inputs in funcArray:
             for inpt in inputs:
-                if inpt[0] == "Fortune 1000": continue
-                thing(i, inpt[1:])
+                # if inpt[0] == "Fortune 1000": continue
+                thing(i, inpt)
             thing(i, unknown=True)
 
 if __name__ == "__main__":

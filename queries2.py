@@ -150,6 +150,7 @@ def likes(unknown=False):
 # Iterate through above queries
 
 def employerInList(employerList=[], unknown=False, opposite=False):
+    if employerList == None: employerList = []
     if unknown: filtr = employer(unknown=True)
     elif len(employerList) <1: filtr=None
     elif opposite == False:
@@ -163,6 +164,7 @@ def employerInList(employerList=[], unknown=False, opposite=False):
     return filtr
 
 def currentCityInList(cityList=[], unknown=False, opposite=False):
+    if cityList==None: cityList = []
     if unknown: filtr = currentcity(unknown=True)
     elif len(cityList) <1: filtr=None
     elif type(cityList[0]) == int:
@@ -179,6 +181,7 @@ def currentCityInList(cityList=[], unknown=False, opposite=False):
         return filtr
 
 def hometownInList(cityList=[], unknown=False):
+    if cityList==None: cityList = []
     if unknown: filtr = hometown(unknown=True)
     elif len(cityList) <1: filtr= None
     elif type(cityList[0]) == int:
@@ -190,6 +193,7 @@ def hometownInList(cityList=[], unknown=False):
     return filtr
 
 def highSchoolInList(schoolList=[], unknown=False):
+    if schoolList==None: cityList=[]
     if unknown: filtr = highschool(unknown=True)
     elif len(schoolList) <1: filtr= None
     elif type(schoolList[0]) == int:
@@ -201,6 +205,7 @@ def highSchoolInList(schoolList=[], unknown=False):
     return filtr
 
 def collegeInList(schoolList=[], unknown=False):
+    if schoolList==None: schoolList = []
     if unknown: filtr = college(unknown=True)
     elif len(schoolList) <1: filtr= None
     elif type(schoolList[0]) == int:
@@ -212,7 +217,8 @@ def collegeInList(schoolList=[], unknown=False):
     return filtr
 
 
-def age(age = [0, 10000], unknown=False):
+def age(age=[0,10000], unknown=False):
+    if age==None: age=[0, 10000]
     if unknown: filtr = FacebookUser.birthday == None
     else:
         min_age = age[0]
