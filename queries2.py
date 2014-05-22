@@ -235,7 +235,7 @@ def age(age = [0, 10000], unknown=False):
 
 def readEmploy():
     employArray= []
-    with open('Employment.csv', 'rb') as c:
+    with open('Employment.csv', 'rU') as c:
         creader = csv.reader(c, delimiter=',')
         firstLine = True
         for row in creader:

@@ -62,4 +62,4 @@ if __name__ == "__main__":
     try:
         bitvectorify(*sys.argv[1:])
     except IndexError:
-        print "usage: python bitvectorify.py filename limit"
+        print "usage: python bitvectorify.py"
