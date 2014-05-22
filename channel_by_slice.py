@@ -191,7 +191,7 @@ def flatten_tuple(tup):
 
 if __name__ == "__main__":
 
-    def main(filters=None):
+    def main(filters=None, user_count_cutoff):
         USERS = FacebookUser.query.filter(FacebookUser.pages)
         print len(USERS.all())
         like_groups = []
@@ -225,9 +225,10 @@ if __name__ == "__main__":
 
             filtered_users = get_users(USERS, **kwargs)
             # print len(filtered_users)
-            lb_obj = LikeBreakdown(like_breakdown=like_breakdown(filtered_users),
-                                   filters=permutation, count=len(filtered_users))
-            all_like_dists.append(lb_obj)
+            if len(filtered_users) > user_count_cutoff:
+                lb_obj = LikeBreakdown(like_breakdown=like_breakdown(filtered_users),
+                                       filters=permutation, count=len(filtered_users))
+                all_like_dists.append(lb_obj)
         # print all_like_dists
 
         diffs = compute_diffs(all_like_dists)
@@ -235,16 +236,18 @@ if __name__ == "__main__":
 
         return generate_report(diffs, all_like_dists)
 
+    USER_COUNT_CUTOFF = 25
+
     filter_lst = [
-        ['age', ['15-25', '25-35', '35-45', '45-55', '55-95']],
+        ['sex', ['m', 'f']],
         ['employer', ['Employment.csv', 'NOT::Employment.csv']],
         ['currentcity', ['Location10th.tsv', 'NOT::Location10th.tsv']],
-        ['sex', ['m', 'f']]
+        ['age', ['15-25', '25-35', '35-45', '45-55', '55-95']],
     ]
     filters = {}
     for idx, f in enumerate(filter_lst):
         filters[f[0]] = f[1]
-        report = main(filters)
+        report = main(filters, USER_COUNT_CUTOFF)
         fname = str(filters.keys())
         with open(fname,'w') as f:
             f.write(report)
