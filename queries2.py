@@ -1,7 +1,7 @@
 import csv
 from app.models import *
 from app.models import db
-from sqlalchemy import or_, and_
+from sqlalchemy import or_, and_, not_
 from datetime import datetime
 from dateutil import parser
 
@@ -50,7 +50,6 @@ def zipcode(zipcode=None, typeCity=None, unknown=False):
 def employer(employer=None, unknown=False):
     if unknown: filtr = FacebookUser.employer == None
     else: filtr = FacebookUser.employer.ilike("%%%s%%" % employer)
-
     return filtr
 
 def school(school=None, unknown=False):
@@ -150,15 +149,20 @@ def likes(unknown=False):
 
 # Iterate through above queries
 
-def employerInList(employerList=[], unknown=False):
+def employerInList(employerList=[], unknown=False, opposite=False):
     if unknown: filtr = employer(unknown=True)
-    elif len(employerList) <1: filtr=FacebookUser.employer=="fsdfsdfsdfsdfdsfsdfsdfdsdsfsd"
-    else:
+    elif len(employerList) <1: filtr=None
+    elif opposite == False:
         or_list = [employer(x) for x in employerList]
         filtr = or_(*or_list)
+    elif opposite == True:  # opposite == True
+        and_list = [employer(x) for x in employerList]
+        filtr = and_(*and_list)
+        filtr = not_(filtr)
+        # import pdb; pdb.set_trace()
     return filtr
 
-def currentCityInList(cityList=[], unknown=False):
+def currentCityInList(cityList=[], unknown=False, opposite=False):
     if unknown: filtr = currentcity(unknown=True)
     elif len(cityList) <1: filtr=None
     elif type(cityList[0]) == int:
@@ -166,8 +170,13 @@ def currentCityInList(cityList=[], unknown=False):
         filtr = or_(*or_list)
     else:
         or_list = [currentcity(x) for x in cityList]
-        filtr = or_(*or_list)
-    return filtr
+        if opposite == False:
+            filtr = or_(*or_list)
+        elif opposite == True:
+            filtr = and_(*or_list)
+            filtr = not_(filtr)
+
+        return filtr
 
 def hometownInList(cityList=[], unknown=False):
     if unknown: filtr = hometown(unknown=True)
@@ -204,17 +213,7 @@ def collegeInList(schoolList=[], unknown=False):
 
 
 def age(age = [0, 10000], unknown=False):
-    if unknown: 
-
-        # TODO: relfect the collegeinList highschoolinList stuff
-        # essentially, if the collegeinlist and highschoolinlist
-        # does not have "Clss of XXXX", then it also counts as
-        # an unknown age?? Something like that.
-
-        filtr = or_(
-            FacebookUser.birthday == None
-        )
-
+    if unknown: filtr = FacebookUser.birthday == None
     else:
         min_age = age[0]
         max_age = age[1]        
@@ -233,9 +232,9 @@ def age(age = [0, 10000], unknown=False):
 
 # Code mildly modified from original queries.py
 
-def readEmploy():
+def readEmploy(fname='Employment.csv'):
     employArray= []
-    with open('Employment.csv', 'rb') as c:
+    with open(fname, 'rbU') as c:
         creader = csv.reader(c, delimiter=',')
         firstLine = True
         for row in creader:
@@ -251,9 +250,9 @@ def readEmploy():
                             employArray[i-1].append(line)
     return filter(lambda x: len(x)>0, employArray)
 
-def readZip():
+def readZip(fname='Location10th.tsv'):
     zipArray= []
-    with open('Location.tsv', 'rb') as c:
+    with open(fname, 'rb') as c:
         creader = csv.reader(c, delimiter='\t')
         firstLine = True
         for row in creader:
@@ -263,8 +262,7 @@ def readZip():
                 zipArray.append(row[0])
     return [zipArray[0]] + map(int, zipArray[1:])
 
-
-# Still need read AGE, read LIKES
+    # Still need read AGE, read LIKES
 
 funEmploy = [employerInList, "Employer" , readEmploy()]
 funAge = [age, "Age", [["15-24", 15,24], ["25-34", 25,34], ["35-44", 35,44], ["45-54", 45, 54], ["55-64", 55, 64], ["65+", 65, 200]]]
@@ -341,7 +339,7 @@ if __name__ == "__main__":
                         filters, 
                         funcArray[depth][0](unknown=True)
                     ), 
-                    printString + ", " + funcArray[depth][1] + ": Unknown" 
+                    printString + ", " + funcArray[depth][1] + ": Unknown"
                 )
 
         elif length>0:
@@ -366,4 +364,9 @@ if __name__ == "__main__":
     f2 = open("bitarrays.txt", 'w')
     buildTree(funcArray=funArray[0:])
     for uid, bitstring in uDict.items():
-        f2.write(str(uid) + ":" + bitstring + "\n")
+        f2.write(str(uid) + ":" + bitstring)
+
+__all__ = ['sex','currentcity','hometown', 'school', 'employer','zipcode', 
+           'likes','highschool','college','employerInList','currentCityInList',
+           'hometownInList', 'highSchoolInList','collegeInList','age','readEmploy',
+           'readZip']

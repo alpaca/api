@@ -45,6 +45,9 @@ def shell_imports():
     from app.models import __all__
     for obj in __all__:
         exec "from app.models import %s" % obj
+    from queries2 import __all__
+    for obj in __all__:
+        exec "from queries2 import %s" % obj
     from app.tasks import scrape
 
     imports = {}

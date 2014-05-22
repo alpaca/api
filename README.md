@@ -65,3 +65,11 @@ pg_dump -a -inserts --table="facebook_pages_users" alpaca_api_development  --sch
 Analyzing Stuff with iPython
 -----------------------------
 http://nbviewer.ipython.org/github/jrjohansson/scientific-python-lectures/blob/master/Lecture-4-Matplotlib.ipynb
+
+
+Al Code (Don't touch)
+---------------------
+
+```
+users = map(lambda (user, hometown): user, map(lambda (user, hometown): (user, eval(hometown)), filter(lambda (user, hometown): hometown[0] == "{", map(lambda user: (user, user.hometown), filter(lambda user: user.hometown, FacebookUser.query)))))
+```
