@@ -174,6 +174,9 @@ def generate_report(diffs, lbobjs):
         report += "\n"
     return report
 
+def generate_csv(diffs, lbobjs):
+
+
 
 class LikeBreakdown(object):
     def __init__(self, like_breakdown=None, filters={}, count=0):
@@ -240,7 +243,12 @@ if __name__ == "__main__":
 
     filter_lst = [
         ['sex', ['m', 'f']],
-        ['employer', ['Employment.csv', 'NOT::Employment.csv']],
+        ['employer', ['Entry-Level.csv', 'Fortune_1000.csv', 'Intern.csv',
+                      'law.csv', 'Manager.csv', 'medicine.csv',
+                      'owner:founder.csv', 'public_servant.csv',
+                      'religious.csv', 'retired.csv', 'Senior_leadership.csv',
+                      'student.csv', 'technology.csv', 
+                      'NOT::all_emp_Cats.csv']],
         ['currentcity', ['Location10th.tsv', 'NOT::Location10th.tsv']],
         ['age', ['15-25', '25-35', '35-45', '45-55', '55-95']],
     ]
