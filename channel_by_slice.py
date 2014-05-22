@@ -4,6 +4,8 @@ from app.models import FacebookUser
 from sqlalchemy import and_
 import operator
 import os
+import ast
+import sys
 import itertools
 
 
@@ -11,7 +13,11 @@ FILTER_FUNS_K = {
     'age': lambda x: queries.age(age=[int(x.split('-')[0]),
                                       int(x.split('-')[-1])]),
     'sex': lambda x: queries.sex(sex=x),
-    'currentcity': lambda x: queries.currentcity(city=x)
+    'employer': lambda _x: queries.employerInList(reduce(lambda x, y: x + y,
+                map(lambda cat: cat[1:], queries.readEmploy(_x.split('NOT::')[-1])), []),
+                                                 opposite=("NOT::" in _x)),
+    'currentcity': lambda _x: queries.currentCityInList(queries.readZip(_x.split('NOT::')[-1]),
+                                                 opposite=("NOT::" in _x))
 
 }
 
@@ -140,12 +146,17 @@ def compute_diffs(all_like_dists):
     return diffs
 
 
-def generate_report(diffs):
+def generate_report(diffs, lbobjs):
+
     report = ""
     for diff in diffs:
+        count = -1
+        for obj in lbobjs:
+            if str(obj.filters) == diff:
+                count = obj.user_count
         sorted_dic = sorted(diffs[diff].iteritems(),
                             key=operator.itemgetter(1))
-        report += "=== %s ==========\n" % diff.upper()
+        report += "=== %s == (%i) ========\n" % (diff.upper(), count)
 
         for i in range(5):
             try:
@@ -165,20 +176,31 @@ def generate_report(diffs):
 
 
 class LikeBreakdown(object):
-    def __init__(self, like_breakdown=None, filters={}):
+    def __init__(self, like_breakdown=None, filters={}, count=0):
         self.filters = filters
         self.like_breakdown = like_breakdown
+        self.user_count = count
+        print self.user_count
         self.total = sum([self.like_breakdown[k] for k in self.like_breakdown])
 
+def flatten_tuple(tup):
+    output = []
+    for item in tup:
+        output += flatten_tuple(item) if hasattr(item, "__iter__") else [item]
+    return output
 
 if __name__ == "__main__":
-    def main():
+
+    def main(filters=None):
         USERS = FacebookUser.query.filter(FacebookUser.pages)
         print len(USERS.all())
         like_groups = []
-        filters = {'age': ['15-25', '25-35', '35-45', '45-55', '55-95'],
-                   #'currentcity': ['chicago'],
-                   'sex': ['m', 'f']}
+
+        if filters == None:
+            filters = {'age': ['15-25', '25-35', '35-45', '45-55', '55-95'],
+                       'employer': ['Employment.csv', 'NOT::Employment.csv'],
+                       'currentcity': ['Location10th.tsv', 'NOT::Location10th.tsv'],
+                       'sex': ['m', 'f']}
 
         all_permutations = []
         for key in filters:
@@ -190,19 +212,42 @@ if __name__ == "__main__":
 
         all_like_dists = []
         for permutation in all_permutations:
+            print permutation
+            if type(permutation) == list or type(permutation) == tuple:
+                permutation = flatten_tuple(permutation)
+            else:
+                permutation = [permutation]
+            print permutation
+            print "=========="
             kwargs = {}
             for idx, key in enumerate(filters):
                 kwargs[key] = permutation[idx]
+
             filtered_users = get_users(USERS, **kwargs)
             # print len(filtered_users)
             lb_obj = LikeBreakdown(like_breakdown=like_breakdown(filtered_users),
-                                   filters=permutation)
+                                   filters=permutation, count=len(filtered_users))
             all_like_dists.append(lb_obj)
         # print all_like_dists
 
         diffs = compute_diffs(all_like_dists)
         # print diffs
 
-        print generate_report(diffs)
+        return generate_report(diffs, all_like_dists)
 
-    main()
+    filter_lst = [
+        ['age', ['15-25', '25-35', '35-45', '45-55', '55-95']],
+        ['employer', ['Employment.csv', 'NOT::Employment.csv']],
+        ['currentcity', ['Location10th.tsv', 'NOT::Location10th.tsv']],
+        ['sex', ['m', 'f']]
+    ]
+    filters = {}
+    for idx, f in enumerate(filter_lst):
+        filters[f[0]] = f[1]
+        report = main(filters)
+        fname = str(filters.keys())
+        with open(fname,'w') as f:
+            f.write(report)
+
+        print "Generated level %i" % idx
+    #main()
