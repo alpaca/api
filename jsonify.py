@@ -46,7 +46,7 @@ def jsonify(fname, limit=None):
     else:
         bitvectors = pickle.load(open( "bitvectors.pickle", "rb" ))
 
-    bitvectors = map(lambda user: user['string'], bitvectors.items())
+    bitvectors = dict((key, value['string']) for (key, value) in bitvectors.items())
 
     # Empty file
     f = open(fname,'w')
