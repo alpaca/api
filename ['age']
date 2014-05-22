@@ -1,0 +1,65 @@
+=== ['45-55'] == (197) ========
+Local/travel website: 0.915941258555
+Hotel: 0.665483470047
+Travel/leisure: 0.646119193202
+Tours/sightseeing: 0.54477543598
+Personal website: 0.48688354066
+
+tech: -0.470922577952
+politics: -0.32492563365
+Fictional character: -0.295910976071
+tv: -0.290057405766
+Just for fun: -0.27826065696
+
+=== ['55-95'] == (327) ========
+Landmark: 0.500842785087
+Pet supplies: 0.485779581952
+Transportation: 0.485209006076
+Farming/agriculture: 0.479704154311
+Outdoor gear/sporting goods: 0.384049259532
+
+health: -0.501591641269
+Jewelry/watches: -0.479509552428
+Clothing: -0.317470437003
+Coach: -0.267958861159
+Just for fun: -0.228562707802
+
+=== ['15-25'] == (171) ========
+Comedian: 0.882715917126
+Just for fun: 0.739969013573
+Fictional character: 0.6467021023
+Personal blog: 0.630566463939
+Producer: 0.56528125668
+
+Travel/leisure: -0.409638680491
+Retail and consumer merchandise: -0.382312706814
+health: -0.361830102604
+home_living: -0.340574595231
+Automotive: -0.336694392187
+
+=== ['35-45'] == (137) ========
+family: 1.52102538553
+Automobiles and parts: 1.2924544928
+Cars: 0.941867620781
+Jewelry/watches: 0.815033297343
+Pet supplies: 0.771943781745
+
+government: -0.378835691929
+Fictional character: -0.287861862583
+Non-governmental organization (ngo): -0.28368613707
+art: -0.254940084838
+Non-profit organization: -0.216830521569
+
+=== ['25-35'] == (144) ========
+Jewelry/watches: 1.0328938154
+Vitamins/supplements: 0.779884341547
+Clothing: 0.705579737779
+Coach: 0.664131728119
+health: 0.56034254907
+
+Fictional character: -0.36314310272
+Journalist: -0.327562352307
+Cause: -0.29659137556
+Comedian: -0.262763815348
+Travel/leisure: -0.239693077022
+

@@ -1,0 +1,130 @@
+=== ['15-25', 'EMPLOYMENT.CSV'] == (138) ========
+Comedian: 0.624708490627
+musical: 0.480367811783
+Radio station: 0.478620207978
+Fictional character: 0.416955269972
+Entertainer: 0.342013786681
+
+Travel/leisure: -0.474974694127
+News/media website: -0.409249869306
+Retail and consumer merchandise: -0.325707573848
+tv: -0.315903797486
+Hotel: -0.290495660232
+
+=== ['55-95', 'EMPLOYMENT.CSV'] == (268) ========
+Pet supplies: 1.01431209147
+Outdoor gear/sporting goods: 0.724375063288
+Farming/agriculture: 0.499683767163
+Pet services: 0.394348835898
+Website: 0.296710544765
+
+health: -0.407544283811
+Jewelry/watches: -0.351488100686
+Clothing: -0.309046222459
+finance: -0.273738049864
+business: -0.273411639999
+
+=== ['15-25', 'NOT::EMPLOYMENT.CSV'] == (146) ========
+Comedian: 0.634901567762
+musical: 0.475310496989
+Radio station: 0.458138822989
+Fictional character: 0.416210859897
+Entertainer: 0.343030921977
+
+Travel/leisure: -0.482247180571
+News/media website: -0.417432755482
+Retail and consumer merchandise: -0.33504766179
+tv: -0.325379684274
+Hotel: -0.300323492596
+
+=== ['25-35', 'EMPLOYMENT.CSV'] == (118) ========
+Vitamins/supplements: 1.05567042942
+health: 0.677323918484
+Coach: 0.618138117415
+Spas/beauty/personal care: 0.503725435339
+finance: 0.465976012034
+
+Travel/leisure: -0.33730600874
+Fictional character: -0.316321717919
+City: -0.27064348606
+Website: -0.217005344692
+Journalist: -0.215184559214
+
+=== ['55-95', 'NOT::EMPLOYMENT.CSV'] == (287) ========
+Pet supplies: 1.01993902018
+Outdoor gear/sporting goods: 0.745213952942
+Farming/agriculture: 0.478383720467
+Pet services: 0.393904650726
+Website: 0.284424235181
+
+health: -0.394975436548
+Jewelry/watches: -0.36069893169
+business: -0.254495939611
+home_living: -0.25160021348
+finance: -0.243141919207
+
+=== ['45-55', 'EMPLOYMENT.CSV'] == (155) ========
+Local/travel website: 1.00938662459
+Travel/leisure: 0.842019215639
+Hotel: 0.799519137871
+Personal website: 0.670593588971
+Tours/sightseeing: 0.541321466015
+
+tech: -0.491433089109
+politics: -0.340092068963
+tv: -0.309354970108
+Clothing: -0.297151163952
+Fictional character: -0.281719612016
+
+=== ['45-55', 'NOT::EMPLOYMENT.CSV'] == (171) ========
+Local/travel website: 1.07456453086
+Tours/sightseeing: 0.735408951936
+Hotel: 0.715777372214
+Travel/leisure: 0.710681508323
+Real estate: 0.628978580556
+
+tech: -0.455084187879
+politics: -0.36331084286
+Fictional character: -0.34635168177
+tv: -0.265060909697
+Cars: -0.236357643382
+
+=== ['35-45', 'EMPLOYMENT.CSV'] == (115) ========
+Automobiles and parts: 1.42522221374
+Cars: 1.08073415735
+Jewelry/watches: 0.952515944413
+medical: 0.633505316004
+tv: 0.626050255958
+
+religious: -0.2863174671
+government: -0.282071364889
+Entertainer: -0.261884138511
+community: -0.228317606638
+Non-profit organization: -0.221916336865
+
+=== ['35-45', 'NOT::EMPLOYMENT.CSV'] == (121) ========
+Automobiles and parts: 1.39163128189
+Cars: 1.05191461296
+Jewelry/watches: 0.925472307076
+tv: 0.775334996958
+medical: 0.628201479215
+
+religious: -0.296202442251
+government: -0.268015664971
+Entertainer: -0.249360891782
+community: -0.227814828783
+Non-profit organization: -0.218387592325
+
+=== ['25-35', 'NOT::EMPLOYMENT.CSV'] == (125) ========
+Vitamins/supplements: 0.960184161283
+health: 0.642308020114
+Coach: 0.542975305347
+Spas/beauty/personal care: 0.45818011524
+finance: 0.433724264251
+
+Travel/leisure: -0.360189369394
+Fictional character: -0.348078699401
+Website: -0.231889995375
+Cause: -0.230802534302
+Journalist: -0.222856279491
+
