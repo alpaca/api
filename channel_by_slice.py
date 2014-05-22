@@ -11,7 +11,8 @@ FILTER_FUNS_K = {
     'age': lambda x: queries.age(age=[int(x.split('-')[0]),
                                       int(x.split('-')[-1])]),
     'sex': lambda x: queries.sex(sex=x),
-    'currentcity': lambda x: queries.currentcity(city=x)
+    'employer': lambda x: queries.employerInList(queries.readEmploy(x)),
+    'zipcode': lambda x: queries.employerInList(queries.readZip(x))
 
 }
 
@@ -165,9 +166,10 @@ def generate_report(diffs):
 
 
 class LikeBreakdown(object):
-    def __init__(self, like_breakdown=None, filters={}):
+    def __init__(self, like_breakdown=None, filters={}, count=0):
         self.filters = filters
         self.like_breakdown = like_breakdown
+        self.user_count = count
         self.total = sum([self.like_breakdown[k] for k in self.like_breakdown])
 
 
@@ -177,7 +179,7 @@ if __name__ == "__main__":
         print len(USERS.all())
         like_groups = []
         filters = {'age': ['15-25', '25-35', '35-45', '45-55', '55-95'],
-                   #'currentcity': ['chicago'],
+                   'employer': ['Employment.csv', ]
                    'sex': ['m', 'f']}
 
         all_permutations = []
@@ -196,7 +198,7 @@ if __name__ == "__main__":
             filtered_users = get_users(USERS, **kwargs)
             # print len(filtered_users)
             lb_obj = LikeBreakdown(like_breakdown=like_breakdown(filtered_users),
-                                   filters=permutation)
+                                   filters=permutation, count=len(filtered_users))
             all_like_dists.append(lb_obj)
         # print all_like_dists
 
