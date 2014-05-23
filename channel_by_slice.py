@@ -3,9 +3,6 @@ import queries2 as queries
 from app.models import FacebookUser
 from sqlalchemy import and_
 import operator
-import os
-import ast
-import sys
 import itertools
 
 
@@ -13,13 +10,22 @@ FILTER_FUNS_K = {
     'age': lambda x: queries.age(age=[int(x.split('-')[0]),
                                       int(x.split('-')[-1])]),
     'sex': lambda x: queries.sex(sex=x),
-    'employer': lambda _x: queries.employerInList(reduce(lambda x, y: x + y,
-                map(lambda cat: cat[1:], queries.readEmploy(_x.split('NOT::')[-1])), []),
+    # 'employer': lambda _x: queries.employerInList(reduce(lambda x, y: x + y,
+    #             map(lambda cat: cat[1:], queries.readEmploy(_x.split('NOT::')[-1])), []),
+    #                                              opposite=("NOT::" in _x)),
+    'currentcity': lambda _x: queries.currentCityInList(readFile(_x.split('NOT::')[-1], int),
                                                  opposite=("NOT::" in _x)),
-    'currentcity': lambda _x: queries.currentCityInList(queries.readZip(_x.split('NOT::')[-1]),
+    'employer': lambda _x: queries.employerInList(readFile(_x.split('NOT::')[-1], str),
                                                  opposite=("NOT::" in _x))
 
 }
+
+def readFile(fname,_type):
+    arr = []
+    with open(fname,'r') as f:
+        for line in f:
+            arr.append(_type(line.rstrip(',\t\n').lower()))
+    return arr
 
 CATEGORIES_K = {
     'musical': ["album", "concert tour", "concert venue", "music",
@@ -75,6 +81,9 @@ def like_breakdown(user_lst):
     for idx, user in enumerate(user_lst):
         for page in user.pages:
             cat = page.type
+            if not page.type:
+                print "Caught a page without a type."
+                continue
             for group in CATEGORIES_K:
                 if page.type.lower() in CATEGORIES_K[group]:
                     cat = group
@@ -175,6 +184,31 @@ def generate_report(diffs, lbobjs):
     return report
 
 def generate_csv(diffs, lbobjs):
+    csv = ""
+    for diff in diffs:
+        count = -1
+        for obj in lbobjs:
+            if str(obj.filters) == diff:
+                count = obj.user_count
+        sorted_dic = sorted(diffs[diff].iteritems(),
+                            key=operator.itemgetter(1))
+        csv += "%s,%i\n" % (diff.upper().replace(',',';'), count) # [15-24,M], 1000
+        for i in range(5):
+            try:
+                csv += "%s,%s\n" % (str(sorted_dic[-(i+1)][0]),
+                                        str(sorted_dic[-(i+1)][1]))
+            except IndexError:
+                pass
+
+        for i in range(5):
+            try:
+                csv += "%s,%s\n" % (str(sorted_dic[i][0]),
+                                        str(sorted_dic[i][1]))
+            except IndexError:
+                pass
+        csv += "\n"
+    csv += '\n'
+    return csv
 
 
 
@@ -194,7 +228,7 @@ def flatten_tuple(tup):
 
 if __name__ == "__main__":
 
-    def main(filters=None, user_count_cutoff):
+    def main(filters=None, user_count_cutoff=0, out_format=None):
         USERS = FacebookUser.query.filter(FacebookUser.pages)
         print len(USERS.all())
         like_groups = []
@@ -226,6 +260,7 @@ if __name__ == "__main__":
             for idx, key in enumerate(filters):
                 kwargs[key] = permutation[idx]
 
+            print kwargs
             filtered_users = get_users(USERS, **kwargs)
             # print len(filtered_users)
             if len(filtered_users) > user_count_cutoff:
@@ -237,28 +272,45 @@ if __name__ == "__main__":
         diffs = compute_diffs(all_like_dists)
         # print diffs
 
+        if out_format == 'csv':
+            print "generating csv..."
+            return generate_csv(diffs, all_like_dists)
         return generate_report(diffs, all_like_dists)
 
-    USER_COUNT_CUTOFF = 25
+    USER_COUNT_CUTOFF = 50
 
     filter_lst = [
+        ['currentcity', ['Location10th.tsv', 'LocationIL.tsv', 'NOT::Location10th.tsv']],
         ['sex', ['m', 'f']],
+        ['age', ['15-24', '25-34', '35-44', '45-54', '55-64', '65-99']],
         ['employer', ['Entry-Level.csv', 'Fortune_1000.csv', 'Intern.csv',
                       'law.csv', 'Manager.csv', 'medicine.csv',
                       'owner:founder.csv', 'public_servant.csv',
                       'religious.csv', 'retired.csv', 'Senior_leadership.csv',
-                      'student.csv', 'technology.csv', 
-                      'NOT::all_emp_Cats.csv']],
-        ['currentcity', ['Location10th.tsv', 'NOT::Location10th.tsv']],
-        ['age', ['15-25', '25-35', '35-45', '45-55', '55-95']],
+                      'student.csv', 'technology.csv',
+                      'NOT::all_emp_Cats.csv']]
     ]
-    filters = {}
-    for idx, f in enumerate(filter_lst):
-        filters[f[0]] = f[1]
-        report = main(filters, USER_COUNT_CUTOFF)
-        fname = str(filters.keys())
-        with open(fname,'w') as f:
-            f.write(report)
 
-        print "Generated level %i" % idx
+    for i in range(4):
+        print "Iteration %i of permutations." % i
+        cur_filter_lst = filter_lst[i:] + filter_lst[:i]
+        filters = {}
+
+        csv_name = 'all_slices.csv'
+
+        for idx, f in enumerate(cur_filter_lst):
+            filters[f[0]] = f[1]
+            report = main(filters, USER_COUNT_CUTOFF, out_format='csv')
+            fname = str(filters.keys())
+            with open(csv_name, 'a') as f:
+                f.write(report)
+
+        # for idx, f in enumerate(filter_lst):
+        #     filters[f[0]] = f[1]
+        #     report = main(filters, USER_COUNT_CUTOFF)
+        #     fname = str(filters.keys())
+        #     with open(fname,'w') as f:
+        #         f.write(report)
+
+            print "Generated level %i" % idx
     #main()
