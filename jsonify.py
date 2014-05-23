@@ -96,6 +96,9 @@ def jsonify(fname, limit=None):
         for loc in js.get('locations'):
             loc['latlong'] = (loc['longitude'], loc['latitude'])
 
+        for page in js.get('pages'):
+            page['type'] = page['type'].replace(" ", "_").replace("-", "_").replace("(","").replace(")", "")
+
         # Remove stupid bitstring
         del dict_bitvectors[user.uid]['string']
 
