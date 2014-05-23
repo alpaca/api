@@ -42,8 +42,8 @@ def removew(d):
         elif isinstance(v, list) and len(v) > 0 and isinstance(v[0], dict):
             d[k] = [removew(item) for item in v]
         elif isinstance(v, list) and len(v) > 0 and isinstance(v[0], str):
-            d[k] = [item.replace(" ", "_").replace("-", "_") for item in v]
-        d[k.replace(" ", "_").replace("-", "_")] = d.pop(k)
+            d[k] = [item.replace(" ", "_").replace("-", "_").replace("(","").replace(")", "") for item in v]
+        d[k.replace(" ", "_").replace("-", "_").replace("(","").replace(")", "")] = d.pop(k)
     return d
 
 def jsonify(fname, limit=None):
@@ -88,6 +88,8 @@ def jsonify(fname, limit=None):
 
     for user in FacebookUser.query.filter(filtr).limit(limit):
         js = user.to_json()
+
+        js['contact_time'] = js['contact_time'].replace(" ", "_").replace("-", "_").replace("(","").replace(")", "")
 
         # customize json
 
