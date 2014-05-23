@@ -2,9 +2,10 @@
 
 from .. import app
 import re
+from datetime import datetime, timedelta
 from sqlalchemy import Table, MetaData, Column, ForeignKey, Integer, String, BigInteger, Date, Text, Boolean, Float
 from flask.ext.sqlalchemy import SQLAlchemy
-from sqlalchemy.sql.elements import BinaryExpression, BooleanClauseList
+from sqlalchemy.sql.elements import BinaryExpression, BooleanClauseList, ClauseList
 from sqlalchemy.sql.operators import ilike_op, between_op
 
 ### START MONKEY PATCH ###
@@ -28,7 +29,11 @@ original_visit_clauselist = EvaluatorCompiler.visit_clauselist
 
 def patched_process(self, clause):
     try:
-        return orignal_process(self, clause)
+        truth_value = orignal_process(self, clause)
+        if truth_value == None:
+            raise
+
+        return truth_value
     except UnevaluatableError:
 
         if  clause.__visit_name__ == "select":
@@ -42,7 +47,10 @@ def patched_process(self, clause):
 
 def patched_visit_binary(self, clause):
     try:
-        return original_visit_binary(self, clause)
+        truth_value = original_visit_binary(self, clause)
+        if truth_value == None:
+            raise
+        return truth_value
     except UnevaluatableError:
         
         column, bind_parameter = clause.get_children()
@@ -53,8 +61,43 @@ def patched_visit_binary(self, clause):
             else:
                 raise
         elif clause.operator == between_op:
-            print "i need to handle this special case for between_op"
-            return lambda x: False
+
+            if type(bind_parameter) == ClauseList:
+                if len(bind_parameter.clauses) == 2:
+
+                    clause1 = bind_parameter.clauses[0]
+                    clause2 = bind_parameter.clauses[1]
+                    
+                    if type(clause1.type) == sqltypes.DateTime and type(clause2.type) == sqltypes.DateTime:
+                        
+                        date1 = clause1.value
+                        date2 = clause2.value
+
+                        def compare_date(obj):
+                            obj_date = getattr(obj, column.name)
+                            # print "date1", date1
+                            # print "date2", date2
+                            # print "obj_date", obj_date
+                            # print date1.date() <= obj_date
+                            # print obj_date < date2.date()
+                            # print date1.date() <= obj_date and obj_date < date2.date()
+
+                            # truth_value = (obj_date < date2.date()) and (date1.date() <= obj_date)
+
+                            # print date1.date()
+                            # print date2.date()
+                            # print obj_date
+
+                            if obj_date == None: return False
+
+                            return (obj_date < date2.date()) and (date1.date() <= obj_date)
+                        return compare_date
+                    else:
+                        raise
+                else:
+                    raise 
+            else:
+                raise
         else:
             raise
 
@@ -81,7 +124,11 @@ class BaseModel(object):
 
     def test_filter(self, criterion):
         compiler = EvaluatorCompiler()
-        return compiler.process(criterion)(self)
+        truth_value = compiler.process(criterion)(self)
+        # if truth_value == None:
+            # print "fuck me"
+        return truth_value
+        # return compiler.process(criterion)(self)
 
 from ..utils import get_model_properties
 from socialscraper import facebook, twitter
