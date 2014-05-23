@@ -122,7 +122,7 @@ def gen_Contact_Times():
 
     # employer_categories = readEmploy()
 
-    empCat = dict( (x[0],x[1:]) for x in readEmploy() )
+    empCat = dict( (x[0],x[1:]) for x in readEmploy2() )
 
     #Filters
     reallyOld = age([65, 1000])
@@ -155,7 +155,7 @@ def gen_Contact_Times():
         if user.test_filter(religion):
             user.contact_time += 'not on sunday or saturday'
 
-        db.session.commit()
+    db.session.commit()
     return
 # def make_heatmap():
 #     lower = (35.4748172441,-93.7086556875)
