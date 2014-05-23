@@ -94,12 +94,13 @@ def jsonify(fname, limit=None):
         # customize json
 
         for loc in js.get('locations'):
-            loc['latlong'] = (float(loc['longitude']), float(loc['latitude']))
+            loc['longlat'] = (float(loc['longitude']), float(loc['latitude']))
 
         # import pdb; pdb.set_trace()
 
         for page in js.get('pages'):
-            page['type'] = page['type'].replace(" ", "_").replace("-", "_").replace("(","").replace(")", "")
+            if page['type']:
+                page['type'] = page['type'].replace(" ", "_").replace("-", "_").replace("(","").replace(")", "")
 
         # Remove stupid bitstring
         del dict_bitvectors[user.uid]['string']
