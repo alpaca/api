@@ -1,0 +1,110 @@
+['LOCATIONIL.TSV'],455
+Record label,1.04383618369
+Personal blog,0.964954018749
+family,0.895944133542
+Patio/garden,0.44451390684
+Chef,0.39662139219
+Non-governmental organization (ngo),-0.548220266468
+Local/travel website,-0.363027405589
+tv,-0.325859385079
+Tours/sightseeing,-0.310565769621
+Cars,-0.295919757473
+
+['LOCATION10TH.TSV'],158
+Personal blog,5.41107867217
+family,3.72173552278
+Personal website,1.75002619867
+Website,0.697646057098
+Jewelry/watches,0.553031408495
+Magazine,-0.538424588639
+tv,-0.466523805241
+Automotive,-0.398560529364
+tech,-0.368678018821
+politics,-0.352327455641
+
+['NOT::LOCATION10TH.TSV'],3798
+Language,0.102678593869
+Non-governmental organization (ngo),0.0751465728035
+Work position,0.0690603440563
+Regional website,0.0574474617033
+Country,0.0565855112376
+Personal blog,-0.229075318654
+family,-0.180608199785
+Animal breed,-0.135473883505
+Office supplies,-0.108643762648
+Record label,-0.100892838845
+
+
+['NOT::LOCATION10TH.TSV'; 'M'],2126
+Language,0.618484225906
+Automobiles and parts,0.525679776019
+Industrials,0.450999291086
+State/province/region,0.389948258822
+Cars,0.388436698679
+family,-0.685692834297
+Jewelry/watches,-0.521700693354
+Pet,-0.512491054049
+Personal blog,-0.497459914322
+Patio/garden,-0.439859445582
+
+['LOCATION10TH.TSV'; 'M'],84
+sports,1.37231528836
+Fictional character,1.26788006563
+leisure,0.775925818938
+City,0.705636872528
+musical,0.473360679415
+Magazine,-0.497367229566
+health,-0.49217500392
+book,-0.437884890925
+business,-0.422128875249
+Travel/leisure,-0.378425963372
+
+['LOCATION10TH.TSV'; 'F'],72
+Personal blog,10.1283022113
+family,6.90149082137
+Personal website,3.61904850052
+Website,1.52083605535
+Jewelry/watches,1.51783139583
+politics,-0.730717118449
+sports,-0.721829624515
+government,-0.686874797613
+Magazine,-0.596674213841
+tech,-0.497614013791
+
+['LOCATIONIL.TSV'; 'F'],201
+Personal blog,2.6876134341
+family,2.60583849497
+Record label,1.96755444504
+Patio/garden,1.82586362805
+Pet,1.12517562523
+Automotive,-0.636757800796
+News personality,-0.561455694035
+sports,-0.467907361392
+Cars,-0.46342814329
+Journalist,-0.453809740928
+
+['NOT::LOCATION10TH.TSV'; 'F'],1650
+Jewelry/watches,0.70692649565
+Pet,0.698057250751
+home_living,0.579197371711
+Pet supplies,0.576054443708
+Patio/garden,0.564181059
+Automobiles and parts,-0.667238239162
+Cars,-0.484086988694
+Automotive,-0.416837247382
+Outdoor gear/sporting goods,-0.392823129326
+leisure,-0.383054369971
+
+['LOCATIONIL.TSV'; 'M'],251
+leisure,0.893489484079
+Fictional character,0.763132565105
+sports,0.638334842549
+Entertainer,0.634390325286
+Games/toys,0.509975079831
+home_living,-0.593790571074
+Personal blog,-0.582928250179
+Jewelry/watches,-0.4465184585
+Non-governmental organization (ngo),-0.435911669377
+Pet services,-0.434831770546
+
+
