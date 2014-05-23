@@ -35,6 +35,17 @@ def del_none(d):
             del_none(value)
     return d  # For convenience
 
+def removew(d):
+    for k, v in d.iteritems():
+        if isinstance(v, dict):
+            removew(v)
+        elif isinstance(v, list) and len(v) > 0 and isinstance(v[0], dict):
+            d[k] = [removew(item) for item in v]
+        elif isinstance(v, list) and len(v) > 0 and isinstance(v[0], str):
+            d[k] = [item.replace(" ", "_").replace("-", "_") for item in v]
+        d[k.replace(" ", "_").replace("-", "_")] = d.pop(k)
+    return d
+
 def jsonify(fname, limit=None):
 
     # if bitvectors pickle doesn't exist
@@ -46,7 +57,7 @@ def jsonify(fname, limit=None):
     else:
         dict_bitvectors = pickle.load(open( "bitvectors.pickle", "rb" ))
 
-    bitvectors = dict((key, value['string']) for (key, value) in dict_bitvectors.items())
+    # bitvectors = dict((key, value['string']) for (key, value) in dict_bitvectors.items())
 
     # Empty file
     f = open(fname,'w')
@@ -67,13 +78,13 @@ def jsonify(fname, limit=None):
                 FacebookUser.locations != None
             )
 
-    empCat = ['retired', 'Intern', 'Entry_level', 'Management', 'Senior_Leadership', 'Owner_or_Founder', 'Fortune_1000', 'Family_Focused', 'Student', 'Public_Servant', 'Campaign_and_Politics', 'Religious_affiliation', 'Medical',  'Law', 'lawfirms', 'Tech', 'Unknown' ]
-    ageCat = ['15_24', '25_34', '35_44', '45_54', '55_64', '65_Over', 'Unknown']
-    sexCat = ['male', 'female', 'other', 'unknown']
-    currentcityCat = ['10th_District', 'Illinois', 'Unknown'] 
-    hometownCat = ['10th_District', 'Illinois', 'Unknown']
-    collegeCat = ['10th_District', 'Illinois', 'Unknown']
-    highschoolCat = ['10th_District', 'Illinois', 'Unknown']
+    # empCat = ['retired', 'Intern', 'Entry_level', 'Management', 'Senior_Leadership', 'Owner_or_Founder', 'Fortune_1000', 'Family_Focused', 'Student', 'Public_Servant', 'Campaign_and_Politics', 'Religious_affiliation', 'Medical',  'Law', 'lawfirms', 'Tech', 'Unknown' ]
+    # ageCat = ['15_24', '25_34', '35_44', '45_54', '55_64', '65_Over', 'Unknown']
+    # sexCat = ['male', 'female', 'other', 'unknown']
+    # currentcityCat = ['10th_District', 'Illinois', 'Unknown'] 
+    # hometownCat = ['10th_District', 'Illinois', 'Unknown']
+    # collegeCat = ['10th_District', 'Illinois', 'Unknown']
+    # highschoolCat = ['10th_District', 'Illinois', 'Unknown']
 
     for user in FacebookUser.query.filter(filtr).limit(limit):
         js = user.to_json()
@@ -83,83 +94,32 @@ def jsonify(fname, limit=None):
         for loc in js.get('locations'):
             loc['latlong'] = (loc['longitude'], loc['latitude'])
 
-        js['employment_cat'] = {}
-        js['age'] = {}
-        js['sex_cat'] = {}
-        js['currentcity_cat'] = {}
-        js['hometown_cat'] = {}
-        js['highschool_cat'] = {}
-        js['college_cat'] = {}
-        employStr = ''
-        for i in range(17):
-            if int(bitvectors[user.uid][i]): 
-                employStr += empCat[i] + ' '
-            
-        js['employment_cat'] = employStr
+        # Remove stupid bitstring
+        del dict_bitvectors[user.uid]['string']
 
-        # import pdb; pdb.set_trace()
+        # Replace bitvector dict with a list of the True values
+        for k, v in dict_bitvectors[user.uid].iteritems():
+            dict_bitvectors[user.uid][k] = [key for (key, value) in dict_bitvectors[user.uid][k].items() if value==True]
 
-        ageStr = ''
-        for i,j in zip(range(17,24), range(6)):
-            if int(bitvectors[user.uid][i]):
-                ageStr += ageCat[j] + ' '
+        if dict_bitvectors[user.uid]['Current City'] == []:
+            dict_bitvectors[user.uid]['Current City'].append('Out of Illinois')
 
-        js['age'] = ageStr
+        if dict_bitvectors[user.uid]['Hometown'] == []:
+            dict_bitvectors[user.uid]['Hometown'].append('Out of Illinois')
 
-        # import pdb; pdb.set_trace()
+        if dict_bitvectors[user.uid]['College'] == []:
+            dict_bitvectors[user.uid]['College'].append('Out of Illinois')
 
-        sexStr = ''
-        j = 0
-        for i in range(24,28):
-            if int(bitvectors[user.uid][i]):
-                sexStr += sexCat[j] + ' '
-            j += 1
+        if dict_bitvectors[user.uid]['High School'] == []:
+            dict_bitvectors[user.uid]['High School'].append('Out of Illinois')
 
-        js['sex_cat'] = sexStr
-           
-        ccStr = '' 
-        j = 0            
-        for i in range(28,31):
-            if int(bitvectors[user.uid][i]):
-                ccStr += currentcityCat[j] + ' '
-            j += 1
+        dict_bitvectors[user.uid]['Age'] = filter(lambda thing: thing != "Unknown", dict_bitvectors[user.uid]['Age'])
 
-        if ccStr == '': ccStr = 'Outside_IL'
+        # Merge user dict with bitvector dict
+        js.update(dict_bitvectors[user.uid])
 
-        js['currentcity_cat'] = ccStr
-
-        htStr = ''
-        j = 0
-        for i in range(31,34):
-            if int(bitvectors[user.uid][i]):
-                htStr += hometownCat[j] + ' '
-            j += 1
-
-        if htStr == '': htStr = 'Outside_IL'
-         
-        js['hometown_cat'] = htStr
-
-        hsStr = '' 
-        j = 0          
-        for i in range(34,37):
-            if int(bitvectors[user.uid][i]):
-                hsStr += highschoolCat[j] + ' '
-            j += 1
-
-        if hsStr == '': hsStr = 'Outside_IL'
-
-        js['highschool_cat'] = hsStr
-        
-        coStr = '' 
-        j = 0
-        for i in range(37,40):
-            if int(bitvectors[user.uid][i]):
-                coStr += collegeCat[j] + ' '
-            j += 1
-
-        if coStr == '': coStr = 'Outside_IL'
-
-        js['college_cat'] = coStr
+        # Remove whitespace
+        print removew(js)
 
         js = del_none(js)
         # print json.dumps(js, default=default)

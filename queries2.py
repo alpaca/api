@@ -292,10 +292,7 @@ def readZip(fname='Location10th.tsv'):
         creader = csv.reader(c, delimiter='\t')
         firstLine = True
         for row in creader:
-            if firstLine:
-                firstLine = False
-            else:    
-                zipArray.append(row[0])
+            zipArray.append(row[0])
     return [zipArray[0]] + map(int, zipArray[1:])
 
     # Still need read AGE, read LIKES
@@ -303,7 +300,7 @@ def readZip(fname='Location10th.tsv'):
 funEmploy = [employerInList, "Employer" , readEmploy2()]
 funAge = [age, "Age", [["15-24", 15,24], ["25-34", 25,34], ["35-44", 35,44], ["45-54", 45, 54], ["55-64", 55, 64], ["65+", 65, 200]]]
 funSex = [sex, "Sex", ["Mm", "Ff", "Oo"]]
-funCurrentCity  = [currentCityInList, "Current City", [readZip(), ["Illinois", "Illinois"]]]
+funCurrentCity  = [ currentCityInList, "Current City", [ readZip(), ["Illinois", "Illinois"]]]
 funHometown  = [hometownInList, "Hometown", [readZip(), ["Illinois", "Illinois"]]]
 funHighSchool = [highSchoolInList, "High School", [readZip(), ["Illinois", "Illinois"]]]
 funCollege = [collegeInList, "College", [readZip(), ["Illinois", "Illinois"]]]
