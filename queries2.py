@@ -387,12 +387,12 @@ if __name__ == "__main__":
                 cat = seg.split(":")[1][1:]
                 cats = map(lambda x: x[0], funcArray[i][2])+["Unknown"]
                 pos = cats.index(cat)
-                bitstring += "0"*pos + "1"+ ("0"*(len(cats)-pos-1))
+                bitstring += "0"*pos + "1" + ("0"*(len(cats)-pos-1))
             for q in users:
                 if q.uid in uDict:
-                    uDict[q.uid]= binOr(bitstring, uDict[q.uid])
+                    uDict[q.uid] = binOr(bitstring, uDict[q.uid])
                 else:
-                    uDict[q.uid]= bitstring
+                    uDict[q.uid] = bitstring
 
 
     # print len(readEmploy())
