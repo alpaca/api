@@ -42,7 +42,7 @@ def jsonify(fname, limit=None):
 
     if not os.path.isfile('bitvectors.pickle'):
         dict_bitvectors = bitvectorify()
-        pickle.dump(bitvectors, open('bitvectors.pickle', 'wb'))
+        pickle.dump(dict_bitvectors, open('bitvectors.pickle', 'wb'))
     else:
         dict_bitvectors = pickle.load(open( "bitvectors.pickle", "rb" ))
 
@@ -151,8 +151,8 @@ def jsonify(fname, limit=None):
         js['highschool_cat'] = hsStr
         
         coStr = '' 
-        j = 0            
-        for i in range(37,39):
+        j = 0
+        for i in range(37,40):
             if int(bitvectors[user.uid][i]):
                 coStr += collegeCat[j] + ' '
             j += 1
@@ -160,7 +160,6 @@ def jsonify(fname, limit=None):
         if coStr == '': coStr = 'Outside_IL'
 
         js['college_cat'] = coStr
-
 
         js = del_none(js)
         # print json.dumps(js, default=default)
