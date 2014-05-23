@@ -375,4 +375,5 @@ if __name__ == "__main__":
 __all__ = ['sex','currentcity','hometown', 'school', 'employer','zipcode', 
            'likes','highschool','college','employerInList','currentCityInList',
            'hometownInList', 'highSchoolInList','collegeInList','age','readEmploy',
-           'readZip']
+           'readZip', 'funEmploy', 'funAge', 'funSex', 'funCurrentCity', 'funHometown',
+           'funHighSchool', 'funCollege']

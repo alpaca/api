@@ -73,3 +73,8 @@ Al Code (Don't touch)
 ```
 users = map(lambda (user, hometown): user, map(lambda (user, hometown): (user, eval(hometown)), filter(lambda (user, hometown): hometown[0] == "{", map(lambda user: (user, user.hometown), filter(lambda user: user.hometown, FacebookUser.query)))))
 ```
+
+Places where Categories Are statically Defined
+----------------------------------------------
+channel_by_slice.py
+jsonify.py

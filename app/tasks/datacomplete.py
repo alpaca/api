@@ -1,10 +1,13 @@
 from app.models import db, FacebookUser, Location
-from sqlalchemy import or_
+from sqlalchemy import and_, or_, not_
 from sqlalchemy.exc import IntegrityError
 from geopy.geocoders import GoogleV3,GeoNames
 from geopy.exc import GeocoderServiceError
 
 # import heatmap
+
+from queries2 import funArray as funcArray
+from queries2 import *
 
 import ast, re
 
@@ -115,6 +118,45 @@ def mark_donors(fname):
     db.session.commit()
     return
 
+def gen_Contact_Times():
+
+    # employer_categories = readEmploy()
+
+    empCat = dict( (x[0],x[1:]) for x in readEmploy() )
+
+    #Filters
+    reallyOld = age([65, 1000])
+    young = age([0, 24])
+    normalAge = age([25,64])
+    retired = employerInList(empCat['Retired'])
+    employed = not_(employer(unknown=True))
+    student = employerInList(empCat['Student'])
+    internship = employerInList(empCat['Intern (position)'])
+    religion = employerInList(empCat['Religious-affiliated (position)'])
+
+    for user in FacebookUser.query:
+        user.contact_time = ''
+        #if old or retired
+        if user.test_filter(reallyOld) or user.test_filter(retired):
+            user.contact_time = '8am-2pm'
+        #if student or young
+        elif user.test_filter(student) or user.test_filter(young):
+            user.contact_time = '5-10pm'
+        #if a normal age
+        elif user.test_filter(normalAge):
+            user.contact_time = '8-9am or 4-9pm'
+        #if employed and not a student or intern
+        elif user.test_filter(employed) and not (user.test_filter(student) or user.test_filter(internship)):
+            user.contact_time = '8-9am or 4-7pm'
+        #Default
+        else:
+            user.contact_time = '8am-9pm'
+        #if religious
+        if user.test_filter(religion):
+            user.contact_time += 'not on sunday or saturday'
+
+        db.session.commit()
+    return
 # def make_heatmap():
 #     lower = (35.4748172441,-93.7086556875)
 #     upper = (40.4703178606,-84.0625583187)
