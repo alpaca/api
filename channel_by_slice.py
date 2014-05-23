@@ -281,17 +281,17 @@ if __name__ == "__main__":
 
     filter_lst = [
         ['currentcity', ['Location10th.tsv', 'LocationIL.tsv', 'NOT::Location10th.tsv']],
-        ['sex', ['m', 'f']],
+        # ['sex', ['m', 'f']],
         ['age', ['15-24', '25-34', '35-44', '45-54', '55-64', '65-99']],
-        ['employer', ['Entry-Level.csv', 'Fortune_1000.csv', 'Intern.csv',
-                      'law.csv', 'Manager.csv', 'medicine.csv',
-                      'owner:founder.csv', 'public_servant.csv',
-                      'religious.csv', 'retired.csv', 'Senior_leadership.csv',
-                      'student.csv', 'technology.csv',
-                      'NOT::all_emp_Cats.csv']]
+        # ['employer', ['Entry-Level.csv', 'Fortune_1000.csv', 'Intern.csv',
+        #               'law.csv', 'Manager.csv', 'medicine.csv',
+        #               'owner:founder.csv', 'public_servant.csv',
+        #               'religious.csv', 'retired.csv', 'Senior_leadership.csv',
+        #               'student.csv', 'technology.csv',
+        #               'NOT::all_emp_Cats.csv']]
     ]
 
-    for i in range(4):
+    for i in range(len(filter_lst)):
         print "Iteration %i of permutations." % i
         cur_filter_lst = filter_lst[i:] + filter_lst[:i]
         filters = {}

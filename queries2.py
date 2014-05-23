@@ -261,7 +261,30 @@ def readEmploy(fname='Employment.csv'):
                             employArray.append([line])
                         else:
                             employArray[i-1].append(line)
-    return filter(lambda x: len(x)>0, employArray)
+    return filter(lambda x: len(x) > 0, employArray)
+
+def readEmploy2(fname='Employment.csv'):
+    def _column(matrix, i):
+        return [row[i] for row in matrix]
+
+    cols = []
+
+    with open(fname, 'rbU') as f:
+        reader = csv.reader(f, delimiter=',')
+        rows = []
+        for row in reader:
+
+            rows.append(row)
+
+        for i in range(len(rows[0])):
+            cols.append(_column(rows, i))
+        cols_clean = []
+        for col in cols:
+            cols_clean.append([x for x in col if x != ''])
+    return cols_clean
+        
+
+
 
 def readZip(fname='Location10th.tsv'):
     zipArray= []
@@ -382,4 +405,4 @@ if __name__ == "__main__":
 __all__ = ['sex','currentcity','hometown', 'school', 'employer','zipcode', 
            'likes','highschool','college','employerInList','currentCityInList',
            'hometownInList', 'highSchoolInList','collegeInList','age','readEmploy',
-           'readZip']
+           'readZip','readEmploy2']
