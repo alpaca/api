@@ -41,12 +41,12 @@ def jsonify(fname, limit=None):
     # create it, otherwise load from picle
 
     if not os.path.isfile('bitvectors.pickle'):
-        bitvectors = bitvectorify()
+        dict_bitvectors = bitvectorify()
         pickle.dump(bitvectors, open('bitvectors.pickle', 'wb'))
     else:
-        bitvectors = pickle.load(open( "bitvectors.pickle", "rb" ))
+        dict_bitvectors = pickle.load(open( "bitvectors.pickle", "rb" ))
 
-    bitvectors = dict((key, value['string']) for (key, value) in bitvectors.items())
+    bitvectors = dict((key, value['string']) for (key, value) in dict_bitvectors.items())
 
     # Empty file
     f = open(fname,'w')
@@ -95,17 +95,18 @@ def jsonify(fname, limit=None):
             if int(bitvectors[user.uid][i]): 
                 employStr += empCat[i] + ' '
             
-
         js['employment_cat'] = employStr
 
+        # import pdb; pdb.set_trace()
+
         ageStr = ''
-        j = 0
-        for i in range(17,24):
+        for i,j in zip(range(17,24), range(6)):
             if int(bitvectors[user.uid][i]):
                 ageStr += ageCat[j] + ' '
-            j += 1
 
         js['age'] = ageStr
+
+        # import pdb; pdb.set_trace()
 
         sexStr = ''
         j = 0
@@ -166,6 +167,8 @@ def jsonify(fname, limit=None):
         f.write('{"index":{"_index":"alpaca","_type":"user","_id":%i}} \n' % js['uid'])
         json.dump(js, f, default=default)
         f.write('\n')
+
+        # import pdb; pdb.set_trace()
 
     f.close()
 
