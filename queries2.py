@@ -158,7 +158,7 @@ def employerInList(employerList=[], unknown=False, opposite=False):
         filtr = or_(*or_list)
     elif opposite == True:  # opposite == True
         and_list = [employer(x) for x in employerList]
-        filtr = and_(*and_list)
+        filtr = or_(*and_list)
         filtr = not_(filtr)
         # import pdb; pdb.set_trace()
     return filtr
@@ -168,8 +168,15 @@ def currentCityInList(cityList=[], unknown=False, opposite=False):
     if unknown: filtr = currentcity(unknown=True)
     elif len(cityList) <1: filtr=None
     elif type(cityList[0]) == int:
-        or_list = [zipcode(x, "currentcity") for x in cityList]
-        filtr = or_(*or_list)
+        if opposite == False:
+            or_list = [zipcode(x, "currentcity") for x in cityList]
+            filtr = or_(*or_list)
+            return filtr
+        elif opposite == True:  # opposite == True
+            # just returning all for now, not correct!
+            and_list = [zipcode(x, "currentcity") for x in cityList]
+            filtr = not_(and_(*and_list))
+            return filtr
     else:
         or_list = [currentcity(x) for x in cityList]
         if opposite == False:
@@ -254,7 +261,30 @@ def readEmploy(fname='Employment.csv'):
                             employArray.append([line])
                         else:
                             employArray[i-1].append(line)
-    return filter(lambda x: len(x)>0, employArray)
+    return filter(lambda x: len(x) > 0, employArray)
+
+def readEmploy2(fname='Employment.csv'):
+    def _column(matrix, i):
+        return [row[i] for row in matrix]
+
+    cols = []
+
+    with open(fname, 'rbU') as f:
+        reader = csv.reader(f, delimiter=',')
+        rows = []
+        for row in reader:
+
+            rows.append(row)
+
+        for i in range(len(rows[0])):
+            cols.append(_column(rows, i))
+        cols_clean = []
+        for col in cols:
+            cols_clean.append([x for x in col if x != ''])
+    return cols_clean
+        
+
+
 
 def readZip(fname='Location10th.tsv'):
     zipArray= []
@@ -375,4 +405,5 @@ if __name__ == "__main__":
 __all__ = ['sex','currentcity','hometown', 'school', 'employer','zipcode', 
            'likes','highschool','college','employerInList','currentCityInList',
            'hometownInList', 'highSchoolInList','collegeInList','age','readEmploy',
-           'readZip']
+           'readZip', 'funEmploy', 'funAge', 'funSex', 'funCurrentCity', 'funHometown',
+           'funHighSchool', 'funCollege', 'readEmploy2']
