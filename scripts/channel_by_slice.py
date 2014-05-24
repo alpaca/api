@@ -296,7 +296,7 @@ if __name__ == "__main__":
         cur_filter_lst = filter_lst[i:] + filter_lst[:i]
         filters = {}
 
-        csv_name = 'all_slices.csv'
+        csv_name = 'data/all_slices.csv'
 
         for idx, f in enumerate(cur_filter_lst):
             filters[f[0]] = f[1]

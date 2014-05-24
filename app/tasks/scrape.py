@@ -15,7 +15,7 @@ from datetime import datetime
 
 from app.tasks import celery
 from app.models import db, FacebookUser, FacebookPage, Transaction
-from ..utils import convert_result
+from socialscraper.adapters.adapter_sqlalchemy import convert_result
 
 logger = logging.getLogger(__name__)
 

@@ -245,7 +245,7 @@ def age(age=[0,10000], unknown=False):
 
 # Code mildly modified from original queries.py
 
-def readEmploy(fname='Employment.csv'):
+def readEmploy(fname='data/Employment.csv'):
     employArray= []
     with open(fname, 'rbU') as c:
         creader = csv.reader(c, delimiter=',')
@@ -263,7 +263,7 @@ def readEmploy(fname='Employment.csv'):
                             employArray[i-1].append(line)
     return filter(lambda x: len(x) > 0, employArray)
 
-def readEmploy2(fname='Employment.csv'):
+def readEmploy2(fname='data/Employment.csv'):
     def _column(matrix, i):
         return [row[i] for row in matrix]
 
@@ -282,11 +282,8 @@ def readEmploy2(fname='Employment.csv'):
         for col in cols:
             cols_clean.append([x for x in col if x != ''])
     return cols_clean
-        
 
-
-
-def readZip(fname='Location10th.tsv'):
+def readZip(fname='data/Location10th.tsv'):
     zipArray= []
     with open(fname, 'rb') as c:
         creader = csv.reader(c, delimiter='\t')
