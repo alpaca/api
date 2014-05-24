@@ -1,5 +1,5 @@
 from __future__ import division
-import queries2 as queries
+from socialanalyzer import queries
 from app.models import FacebookUser
 from sqlalchemy import and_
 import operator

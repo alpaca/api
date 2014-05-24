@@ -4,8 +4,6 @@ import os, pickle
 
 from sqlalchemy import and_, or_
 
-from queries2 import funArray as funcArray
-
 from bitvectorify import bitvectorify
 
 def default(obj):
@@ -146,45 +144,3 @@ if __name__ == "__main__":
     except IndexError:
         print "usage: python jsonify.py filename limit"
         raise
-
-
-        # js['employment_cat']['retired'] = int(bitvectors[user.uid][0])
-        # js['employment_cat']['Intern'] = int(bitvectors[user.uid][1])
-        # js['employment_cat']['Entry-level'] = int(bitvectors[user.uid][2])
-        # js['employment_cat']['Management'] = int(bitvectors[user.uid][3])
-        # js['employment_cat']['Senior_Leadership'] = int(bitvectors[user.uid][4])
-        # js['employment_cat']['Owner/Founder'] = int(bitvectors[user.uid][5])
-        # js['employment_cat']['Fortune 1000'] = int(bitvectors[user.uid][6])
-        # js['employment_cat']['Family-Focused'] = int(bitvectors[user.uid][7])
-        # js['employment_cat']['Student'] = int(bitvectors[user.uid][8])
-        # js['employment_cat']['Public_Servant'] = int(bitvectors[user.uid][9])
-        # js['employment_cat']['Campaign/Politics'] = int(bitvectors[user.uid][10])
-        # js['employment_cat']['Religious-affiliation'] = int(bitvectors[user.uid][11])
-        # js['employment_cat']['Medical'] = int(bitvectors[user.uid][12])
-        # js['employment_cat']['Law'] = int(bitvectors[user.uid][13])
-        # js['employment_cat']['lawfirms'] = int(bitvectors[user.uid][14])
-        # js['employment_cat']['Tech'] = int(bitvectors[user.uid][15])
-        # js['employment_cat']['Unknown'] = int(bitvectors[user.uid][16])
-        # js['age']['15-24'] = int(bitvectors[user.uid][17])
-        # js['age']['25-34'] = int(bitvectors[user.uid][18])
-        # js['age']['35-44'] = int(bitvectors[user.uid][19])
-        # js['age']['45-54'] = int(bitvectors[user.uid][20])
-        # js['age']['55-64'] = int(bitvectors[user.uid][21])
-        # js['age']['65+'] = int(bitvectors[user.uid][22])
-        # js['age']['Unknown'] = int(bitvectors[user.uid][23])
-        # js['sex_cat']['male'] = int(bitvectors[user.uid][24])
-        # js['sex_cat']['female'] = int(bitvectors[user.uid][25])
-        # js['sex_cat']['other'] = int(bitvectors[user.uid][26])
-        # js['sex_cat']['unknown'] = int(bitvectors[user.uid][27])
-        # js['currentcity_cat']['10th District'] = int(bitvectors[user.uid][28])
-        # js['currentcity_cat']['Illinois'] = int(bitvectors[user.uid][29])
-        # js['currentcity_cat']['Unknown'] = int(bitvectors[user.uid][30])
-        # js['hometown_cat']['10th District'] = int(bitvectors[user.uid][31])
-        # js['hometown_cat']['Illinois'] = int(bitvectors[user.uid][32])
-        # js['hometown_cat']['Unknown'] = int(bitvectors[user.uid][33])
-        # js['highschool_cat']['10th District'] = int(bitvectors[user.uid][34])        
-        # js['highschool_cat']['Illinois'] = int(bitvectors[user.uid][35])
-        # js['highschool_cat']['Unknown'] = int(bitvectors[user.uid][36])
-        # js['college_cat']['10th District'] = int(bitvectors[user.uid][37])
-        # js['college_cat']['Illinois'] = int(bitvectors[user.uid][38])
-        # js['college_cat']['Unknown'] = int(bitvectors[user.uid][39])

@@ -1,10 +1,9 @@
 from __future__ import division
-import queries2 as queries
+from socialanalyzer import queries
 from app.models import FacebookUser
 from sqlalchemy import and_
 import operator
 import itertools
-
 
 FILTER_FUNS_K = {
     'age': lambda x: queries.age(age=[int(x.split('-')[0]),
@@ -17,7 +16,6 @@ FILTER_FUNS_K = {
                                                  opposite=("NOT::" in _x)),
     'employer': lambda _x: queries.employerInList(readFile(_x.split('NOT::')[-1], str),
                                                  opposite=("NOT::" in _x))
-
 }
 
 def readFile(fname,_type):
@@ -74,7 +72,6 @@ CATEGORIES_K = {
     'politics': ["political ideology", "political organization",
                  "political party", "politician"]
 }
-
 
 def like_breakdown(user_lst):
     cats = {}

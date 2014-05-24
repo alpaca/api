@@ -3,11 +3,9 @@ from sqlalchemy import and_, or_, not_
 from sqlalchemy.exc import IntegrityError
 from geopy.geocoders import GoogleV3,GeoNames
 from geopy.exc import GeocoderServiceError
+from socialanalyzer.queries import *
 
 # import heatmap
-
-from queries2 import funArray as funcArray
-from queries2 import *
 
 import ast, re
 

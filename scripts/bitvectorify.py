@@ -1,9 +1,17 @@
 from app.models import *
 import sys, json
-
 from sqlalchemy import and_, or_
+from socialanalyzer.queries import *
 
-from queries2 import funArray as funcArray
+### Leaving this code as is for backwards compatibility ###
+funEmploy = [employerInList, "Employer" , readEmploy2()]
+funAge = [age, "Age", [["15-24", 15,24], ["25-34", 25,34], ["35-44", 35,44], ["45-54", 45, 54], ["55-64", 55, 64], ["65+", 65, 200]]]
+funSex = [sex, "Sex", ["Mm", "Ff", "Oo"]]
+funCurrentCity  = [ currentCityInList, "Current City", [ readZip(), ["Illinois", "Illinois"]]]
+funHometown  = [hometownInList, "Hometown", [readZip(), ["Illinois", "Illinois"]]]
+funHighSchool = [highSchoolInList, "High School", [readZip(), ["Illinois", "Illinois"]]]
+funCollege = [collegeInList, "College", [readZip(), ["Illinois", "Illinois"]]]
+funcArray = [funEmploy, funAge , funSex, funCurrentCity, funHometown, funHighSchool, funCollege]
 
 def bitvector_order():
     # PRINT ORDER OF CATEGORIES
