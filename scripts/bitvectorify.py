@@ -55,4 +55,5 @@ if __name__ == "__main__":
 
     bitvectors = bitvectorify(*args)
     pickle.dump(bitvectors, open('../data/bitvectors.pickle.save', 'wb'))
+    print "Saved to ../data/bitvectors.pickle.save"
     

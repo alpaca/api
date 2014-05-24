@@ -46,7 +46,7 @@ def removew(d):
         d[k.replace(" ", "_").replace("-", "_").replace("(","").replace(")", "")] = d.pop(k)
     return d
 
-def jsonify(fname, limit=None):
+def jsonify(limit=None):
 
     # if bitvectors pickle doesn't exist
     # create it, otherwise load from picle
@@ -60,10 +60,10 @@ def jsonify(fname, limit=None):
     # bitvectors = dict((key, value['string']) for (key, value) in dict_bitvectors.items())
 
     # Empty file
-    f = open(fname,'w')
+    f = open("../data/data.json", 'w')
     f.close()
 
-    f = open(fname,'a')
+    f = open("../data/data.json", 'a')
 
     filtr = and_(
                 or_(
@@ -94,9 +94,6 @@ def jsonify(fname, limit=None):
         for page in js.get('pages'):
             if page['type']:
                 page['type'] = page['type'].replace(" ", "_").replace("-", "_").replace("(","").replace(")", "")
-
-        # Remove stupid bitstring
-        del dict_bitvectors[user.uid]['string']
 
         # Replace bitvector dict with a list of the True values
         for k, v in dict_bitvectors[user.uid].iteritems():
@@ -137,6 +134,11 @@ if __name__ == "__main__":
     try:
         args = sys.argv[1:]
     except IndexError:
-        print "usage: python jsonify.py filename limit"
+        print "usage: python jsonify.py limit"
 
     jsonify(*args)
+
+    print "Saved to ../data/data.json"
+    print "Run: "
+    print "    cd ../data"
+    print "    split -l 2500 data.json"
