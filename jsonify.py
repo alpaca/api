@@ -89,7 +89,8 @@ def jsonify(fname, limit=None):
     for user in FacebookUser.query.filter(filtr).limit(limit):
         js = user.to_json()
 
-        js['contact_time'] = js['contact_time'].replace(" ", "_").replace("-", "_").replace("(","").replace(")", "")
+        if js['contact_time']:
+            js['contact_time'] = js['contact_time'].replace(" ", "_").replace("-", "_").replace("(","").replace(")", "")
 
         # customize json
 
