@@ -17,7 +17,8 @@ curl -XPUT http://localhost:9200/alpaca -d '
                 "employer": {"type": "string"},
                 "email": {"type": "string"},
                 "profile_url": {"type": "string"},
-                "name": {"type": "string"}
+                "name": {"type": "string"},
+                "locations.longlat": {"type": "geo_point"}
             }
         }
     }
