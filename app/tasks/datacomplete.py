@@ -155,6 +155,8 @@ def gen_Contact_Times():
         if user.test_filter(religion):
             user.contact_time += 'not on sunday or saturday'
 
+        print user.uid, user.contact_time
+
     db.session.commit()
     return
 # def make_heatmap():
