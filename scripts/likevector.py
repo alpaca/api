@@ -1,4 +1,7 @@
 from __future__ import division
+import sys; sys.path.append("..")
+from app import environment
+
 from socialanalyzer import queries
 from app.models import FacebookUser
 from sqlalchemy import and_

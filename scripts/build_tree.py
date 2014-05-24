@@ -1,6 +1,11 @@
+import sys; sys.path.append("..")
+from app import environment
+from app.models import *
 from socialanalyzer.queries import *
 
-def readEmploy(fname='data/Employment.csv'):
+import csv
+
+def readEmploy(fname='../data/Employment.csv'):
     employArray= []
     with open(fname, 'rbU') as c:
         creader = csv.reader(c, delimiter=',')
@@ -18,7 +23,7 @@ def readEmploy(fname='data/Employment.csv'):
                             employArray[i-1].append(line)
     return filter(lambda x: len(x) > 0, employArray)
 
-def readEmploy2(fname='data/Employment.csv'):
+def readEmploy2(fname='../data/Employment.csv'):
     def _column(matrix, i):
         return [row[i] for row in matrix]
 
@@ -38,7 +43,7 @@ def readEmploy2(fname='data/Employment.csv'):
             cols_clean.append([x for x in col if x != ''])
     return cols_clean
 
-def readZip(fname='data/Location10th.tsv'):
+def readZip(fname='../data/Location10th.tsv'):
     zipArray= []
     with open(fname, 'rb') as c:
         creader = csv.reader(c, delimiter='\t')
@@ -56,7 +61,7 @@ funHighSchool = [highSchoolInList, "High School", [readZip(), ["Illinois", "Illi
 funCollege = [collegeInList, "College", [readZip(), ["Illinois", "Illinois"]]]
 
 uDict = dict()
-funArray = [funEmploy, funAge , funSex, funCurrentCity, funHometown, funHighSchool, funCollege]
+funcArray = [funEmploy, funAge , funSex, funCurrentCity, funHometown, funHighSchool, funCollege]
 
 def binOr(x,y):
     return bin(int(x,2)|int(y,2))[2:]
@@ -128,10 +133,11 @@ def buildTree(depth = 0, funcArray = [], filters=None, printString = ""):
             else:
                 uDict[q.uid] = bitstring
 
-
-# print len(readEmploy())
-# for i in range(len(funArray)):
-f2 = open("bitarrays.txt", 'w')
-buildTree(funcArray=funArray[0:])
-for uid, bitstring in uDict.items():
-    f2.write(str(uid) + ":" + bitstring)
+if __name__ == "__main__":
+    # print len(readEmploy())
+    # for i in range(len(funArray)):
+    f2 = open("../data/bitarrays.txt", 'w')
+    buildTree(funcArray=funcArray[0:])
+    for uid, bitstring in uDict.items():
+        f2.write(str(uid) + ":" + bitstring)
+    f2.close()

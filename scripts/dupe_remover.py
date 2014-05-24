@@ -1,4 +1,6 @@
 from __future__ import division
+import sys; sys.path.append("..")
+from app import environment
 from app.models import *
 from app.models import db
 from sqlalchemy import func

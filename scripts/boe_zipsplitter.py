@@ -1,8 +1,8 @@
+import sys; sys.path.append("..")
+
 from __future__ import division
 import os, pickle, json, requests, pdb, re
 import psycopg2
-
- 
 
 try:
 	conn=psycopg2.connect("dbname='alpaca_api_development' user='postgres' host='localhost' password='postgres'")

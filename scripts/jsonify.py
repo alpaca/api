@@ -1,3 +1,5 @@
+import sys; sys.path.append("..")
+from app import environment
 from app.models import *
 import sys, json
 import os, pickle
@@ -49,11 +51,11 @@ def jsonify(fname, limit=None):
     # if bitvectors pickle doesn't exist
     # create it, otherwise load from picle
 
-    if not os.path.isfile('bitvectors.pickle'):
+    if not os.path.isfile('../data/bitvectors.pickle.save'):
         dict_bitvectors = bitvectorify()
-        pickle.dump(dict_bitvectors, open('bitvectors.pickle', 'wb'))
+        pickle.dump(dict_bitvectors, open('../data/bitvectors.pickle.save', 'wb'))
     else:
-        dict_bitvectors = pickle.load(open( "bitvectors.pickle", "rb" ))
+        dict_bitvectors = pickle.load(open( "../data/bitvectors.pickle.save", "rb" ))
 
     # bitvectors = dict((key, value['string']) for (key, value) in dict_bitvectors.items())
 
@@ -75,14 +77,6 @@ def jsonify(fname, limit=None):
                 FacebookUser.pages != None,
                 FacebookUser.locations != None
             )
-
-    # empCat = ['retired', 'Intern', 'Entry_level', 'Management', 'Senior_Leadership', 'Owner_or_Founder', 'Fortune_1000', 'Family_Focused', 'Student', 'Public_Servant', 'Campaign_and_Politics', 'Religious_affiliation', 'Medical',  'Law', 'lawfirms', 'Tech', 'Unknown' ]
-    # ageCat = ['15_24', '25_34', '35_44', '45_54', '55_64', '65_Over', 'Unknown']
-    # sexCat = ['male', 'female', 'other', 'unknown']
-    # currentcityCat = ['10th_District', 'Illinois', 'Unknown'] 
-    # hometownCat = ['10th_District', 'Illinois', 'Unknown']
-    # collegeCat = ['10th_District', 'Illinois', 'Unknown']
-    # highschoolCat = ['10th_District', 'Illinois', 'Unknown']
 
     for user in FacebookUser.query.filter(filtr).limit(limit):
         js = user.to_json()
@@ -139,8 +133,10 @@ def jsonify(fname, limit=None):
     f.close()
 
 if __name__ == "__main__":
+
     try:
-        jsonify(*sys.argv[1:])
+        args = sys.argv[1:]
     except IndexError:
         print "usage: python jsonify.py filename limit"
-        raise
+
+    jsonify(*args)
