@@ -6,6 +6,11 @@ import operator
 import itertools
 
 
+def get_donors(is_donor):
+    filtr = (FacebookUser.donor == is_donor)
+    return filtr
+
+
 FILTER_FUNS_K = {
     'age': lambda x: queries.age(age=[int(x.split('-')[0]),
                                       int(x.split('-')[-1])]),
@@ -16,11 +21,13 @@ FILTER_FUNS_K = {
     'currentcity': lambda _x: queries.currentCityInList(readFile(_x.split('NOT::')[-1], int),
                                                  opposite=("NOT::" in _x)),
     'employer': lambda _x: queries.employerInList(readFile(_x.split('NOT::')[-1], str),
-                                                 opposite=("NOT::" in _x))
+                                                 opposite=("NOT::" in _x)),
+    'donor': get_donors
 
 }
 
-def readFile(fname,_type):
+
+def readFile(fname, _type):
     arr = []
     with open(fname,'r') as f:
         for line in f:
@@ -226,6 +233,52 @@ def flatten_tuple(tup):
         output += flatten_tuple(item) if hasattr(item, "__iter__") else [item]
     return output
 
+
+def get_uids_for_filter_group(filters, prnt=True):
+    users = FacebookUser.query.filter(FacebookUser.pages)
+    filtered_users = get_users(users, **filters)
+    if prnt:
+        for user in filtered_users:
+            print "%i : %i likes" % (user.uid, len(user.pages))
+    return filtered_users
+
+
+def get_likes_in_cat(users, cat_lst):
+    pages = {}
+    for cat in cat_lst:
+        for usr in users:
+            for pg in usr.pages:
+                # print pg.type
+                if cat.lower() in pg.type.lower():
+                    try:
+                        pages[pg.name.lower()] += 1
+                    except KeyError:
+                        pages[pg.name.lower()] = 1
+    return pages
+
+
+def remove_user_from_set(users, rm_uid):
+    out = []
+    for usr in users:
+        if usr.uid != rm_uid:
+            out.append(usr)
+    return out
+
+
+def users_that_like_cat(users, cat_lst):
+    usrs = {}
+    for cat in cat_lst:
+        for usr in users:
+            for pg in usr.pages:
+                # print pg.type
+                if cat.lower() in pg.type.lower():
+                    try:
+                        usrs[usr.uid] += 1
+                    except KeyError:
+                        usrs[usr.uid] = 1
+    return usrs
+
+
 if __name__ == "__main__":
 
     def main(filters=None, user_count_cutoff=0, out_format=None):
@@ -279,8 +332,12 @@ if __name__ == "__main__":
 
     USER_COUNT_CUTOFF = 25
 
+    ## add things like:
+        # [<category_name>, [<params to pass to filter function>] ]
+        # NOTE: <category_name> must match a key in the FILTER_FUNS_K dict.
+
     filter_lst = [
-        ['currentcity', ['Location10th.tsv', 'LocationIL.tsv', 'NOT::Location10th.tsv']],
+        #['currentcity', ['Location10th.tsv', 'LocationIL.tsv', 'NOT::Location10th.tsv']],
         ['sex', ['m', 'f']],
         # ['age', ['15-24', '25-34', '35-44', '45-54', '55-64', '65-99']],
         # ['employer', ['Entry-Level.csv', 'Fortune_1000.csv', 'Intern.csv',
@@ -289,6 +346,7 @@ if __name__ == "__main__":
         #               'religious.csv', 'retired.csv', 'Senior_leadership.csv',
         #               'student.csv', 'technology.csv',
         #               'NOT::all_emp_Cats.csv']]
+        ['donor', ['0','1']]
     ]
 
     for i in range(len(filter_lst)):
