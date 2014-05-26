@@ -3,11 +3,9 @@ from sqlalchemy import and_, or_, not_
 from sqlalchemy.exc import IntegrityError
 from geopy.geocoders import GoogleV3,GeoNames
 from geopy.exc import GeocoderServiceError
+from socialanalyzer.queries import *
 
 # import heatmap
-
-from queries2 import funArray as funcArray
-from queries2 import *
 
 import ast, re
 
@@ -154,6 +152,8 @@ def gen_Contact_Times():
         #if religious
         if user.test_filter(religion):
             user.contact_time += 'not on sunday or saturday'
+
+        print user.uid, user.contact_time
 
     db.session.commit()
     return

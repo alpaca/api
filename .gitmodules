@@ -10,3 +10,7 @@
 	path = lib/contribscraper
 	url = https://github.com/alpaca/contribscraper.git
 	branch = master
+[submodule "lib/socialanalyzer"]
+	path = lib/socialanalyzer
+	url = https://github.com/alpaca/socialanalyzer.git
+	branch = master

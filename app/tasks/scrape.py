@@ -13,9 +13,11 @@ from sqlalchemy.exc import DatabaseError, OperationalError
 
 from datetime import datetime
 
+import socket
+
 from app.tasks import celery
 from app.models import db, FacebookUser, FacebookPage, Transaction
-from ..utils import convert_result
+from socialscraper.adapters.adapter_sqlalchemy import convert_result
 
 logger = logging.getLogger(__name__)
 
@@ -35,15 +37,17 @@ https://github.com/shazow/urllib3/issues/384
 def manual_init():
     global facebook_scraper
 
-    if not os.path.isfile('facebook_scraper.pickle'):
+    hostname = socket.gethostname().replace(".ece.northwestern.edu", "")
+
+    if not os.path.isfile('facebook_scraper_' + hostname + '.pickle'):
         facebook_scraper = FacebookScraper(scraper_type='nograph')
         facebook_scraper.add_user(email=os.getenv('FACEBOOK_EMAIL'), password=os.getenv('FACEBOOK_PASSWORD'), id=os.getenv('FACEBOOK_USERID'), username=os.getenv('FACEBOOK_USERNAME'))
         facebook_scraper.pick_random_user()
         facebook_scraper.login()
         facebook_scraper.init_api()
-        pickle.dump(facebook_scraper, open('facebook_scraper.pickle', 'wb'))
+        pickle.dump(facebook_scraper, open('facebook_scraper_' + hostname + '.pickle', 'wb'))
     else:
-        facebook_scraper = pickle.load(open( "facebook_scraper.pickle", "rb" ))
+        facebook_scraper = pickle.load(open('facebook_scraper_' + hostname + '.pickle', "rb" ))
 
 @worker_init.connect
 def worker_init(*args, **kwargs):

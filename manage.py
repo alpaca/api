@@ -23,9 +23,6 @@ migrate = Migrate(app, db)
 
 from app.models import FacebookUser, FacebookPage
 
-# from app.models import TwitterUser, TwitterTweet
-# from app.models import FacebookUser, FacebookFamily, FacebookLocation, FacebookFriend, FacebookPage, FacebookStatus, FacebookPagesUsers
-
 # from app.handlers import socketio
 # class GeventSocketIOServer(Server):
 #     def handle(self, app, host, port, use_debugger, use_reloader,
@@ -45,9 +42,9 @@ def shell_imports():
     from app.models import __all__
     for obj in __all__:
         exec "from app.models import %s" % obj
-    from queries2 import __all__
+    from socialanalyzer.queries import __all__
     for obj in __all__:
-        exec "from queries2 import %s" % obj
+        exec "from socialanalyzer.queries import %s" % obj
     from app.tasks import scrape
 
     imports = {}

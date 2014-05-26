@@ -3,12 +3,10 @@ Setup
 ```
 git clone git@github.com:alpaca/api.git
 cd api
-git submodule update --init
-cd lib/socialscraper
-git checkout master
-cd ../identityresolver
-git checkout master
-cd ../..
+
+# this will download git submodules and set them all to master branch
+git submodule update --init; cd lib/socialscraper; git checkout master; cd ../socialanalyzer; git checkout master; cd ../identityresolver; git checkout master; cd ../contribscraper; git checkout master; cd ../..
+
 pip install -r requirements.txt
 # go create a database and then
 python manage.py db upgrade
@@ -72,6 +70,10 @@ Al Code (Don't touch)
 
 ```
 users = map(lambda (user, hometown): user, map(lambda (user, hometown): (user, eval(hometown)), filter(lambda (user, hometown): hometown[0] == "{", map(lambda user: (user, user.hometown), filter(lambda user: user.hometown, FacebookUser.query)))))
+```
+
+```
+[key for (key, value) in dict_bitvectors[user.uid]['Employer'].items() if value==True]
 ```
 
 Places where Categories Are statically Defined
