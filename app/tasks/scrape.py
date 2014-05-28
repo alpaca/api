@@ -35,13 +35,13 @@ https://github.com/shazow/urllib3/issues/384
 
 """
 
-def manual_init():
+def manual_init(scraper_type='nograph'):
     global facebook_scraper
 
     hostname = socket.gethostname().replace(".ece.northwestern.edu", "")
 
     if not os.path.isfile('facebook_scraper_' + hostname + '.pickle'):
-        facebook_scraper = FacebookScraper(scraper_type='nograph')
+        facebook_scraper = FacebookScraper(scraper_type=scraper_type)
         facebook_scraper.add_user(email=os.getenv('FACEBOOK_EMAIL'), password=os.getenv('FACEBOOK_PASSWORD'), id=os.getenv('FACEBOOK_USERID'), username=os.getenv('FACEBOOK_USERNAME'))
         facebook_scraper.pick_random_user()
         facebook_scraper.login()
@@ -49,6 +49,7 @@ def manual_init():
         pickle.dump(facebook_scraper, open('facebook_scraper_' + hostname + '.pickle', 'wb'))
     else:
         facebook_scraper = pickle.load(open('facebook_scraper_' + hostname + '.pickle', "rb" ))
+        facebook_scraper.scraper_type = scraper_type
 
 @worker_init.connect
 def worker_init(*args, **kwargs):
@@ -373,7 +374,7 @@ def get_fans(self, pagename):
                 transaction = Transaction(
                         timestamp = datetime.utcnow(),
                         transact_type = 'error',
-                        func = 'get_likes(%s)' % username,
+                        func = 'get_likes(%s)' % pagename,
                         ref = "%s: %s" % (
                             str(e.errno) if hasattr(e, 'errno') else 0, 
                             e.strerror if hasattr(e, 'strerror') else e
@@ -398,7 +399,7 @@ def get_fans(self, pagename):
                 timestamp = datetime.utcnow(),
                 transact_type = transact_type,
                 ref = "%s.%s" % (FacebookUser.__tablename__, str(result.page_id)),
-                func = 'get_likes(%s)' % username,
+                func = 'get_likes(%s)' % pagename,
                 data = str(result)
             )
 
@@ -406,10 +407,11 @@ def get_fans(self, pagename):
             db.session.commit()
 
             results.append(result)
-            logger.info( "%s - %i - %s" % (username, len(results), result.username))
+            logger.info( "%s - %i - %s" % (pagename, len(results), result.pagename))
 
-    except Exception as e:
-        continue
+    except (ScrapingError, ValueError) as e:
+        logger.info(e)
+        raise
 
     return results
 
