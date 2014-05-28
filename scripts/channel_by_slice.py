@@ -1,9 +1,11 @@
 from __future__ import division
-from socialanalyzer import queries
-from app.models import FacebookUser
+from socialanalyzer import queries  # noqa
+from app.models import FacebookUser  # noqa
 from sqlalchemy import and_
 import operator
 import itertools
+import utils  # noqa
+import sys
 
 
 def get_donors(is_donor):
@@ -15,20 +17,15 @@ FILTER_FUNS_K = {
     'age': lambda x: queries.age(age=[int(x.split('-')[0]),
                                       int(x.split('-')[-1])]),
     'sex': lambda x: queries.sex(sex=x),
-    'currentcity': lambda _x: queries.currentCityInList(readFile(_x.split('NOT::')[-1], int),
-                                                        opposite=("NOT::" in _x)),
-    'employer': lambda _x: queries.employerInList(readFile(_x.split('NOT::')[-1], str),
-                                                  opposite=("NOT::" in _x)),
+    'currentcity': lambda _x: queries.currentCityInList(
+        utils.read_file_lines(_x.split('NOT::')[-1], int),
+        opposite=("NOT::" in _x)),
+    'employer': lambda _x: queries.employerInList(
+        utils.read_file_lines(_x.split('NOT::')[-1], str),
+        opposite=("NOT::" in _x)),
     'donor': get_donors
 }
 
-
-def readFile(fname, _type):
-    arr = []
-    with open(fname, 'r') as f:
-        for line in f:
-            arr.append(_type(line.rstrip(',\t\n').lower()))
-    return arr
 
 CATEGORIES_K = {
     'musical': ["album", "concert tour", "concert venue", "music",
@@ -78,7 +75,10 @@ CATEGORIES_K = {
                  "political party", "politician"]
 }
 
+
 def like_breakdown(user_lst):
+    """ Generate the percentage-based like breakdown
+    for a given list of users. """
     cats = {}
     for idx, user in enumerate(user_lst):
         for page in user.pages:
@@ -185,16 +185,19 @@ def generate_report(diffs, lbobjs):
         report += "\n"
     return report
 
-def generate_csv(diffs, lbobjs):
+
+def generate_csv(diffs, like_breakdown_list, pretty_output=False):
+    if pretty_output:
+        return _generate_csv_pp(diffs, like_breakdown_list)
     csv = ""
     for diff in diffs:
         count = -1
-        for obj in lbobjs:
+        for obj in like_breakdown_list:
             if str(obj.filters) == diff:
                 count = obj.user_count
         sorted_dic = sorted(diffs[diff].iteritems(),
                             key=operator.itemgetter(1))
-        csv += "%s,%i\n" % (diff.upper().replace(',',';'), count) # [15-24,M], 1000
+        csv += "%s,%i\n" % (diff.upper().replace(',',';'), count) # [15-24;M], 1000
         for i in range(5):
             try:
                 csv += "%s,%s\n" % (str(sorted_dic[-(i+1)][0]),
@@ -212,6 +215,9 @@ def generate_csv(diffs, lbobjs):
     csv += '\n'
     return csv
 
+
+def _generate_csv_pp(diffs, like_breakdown_list):
+    pass
 
 
 class LikeBreakdown(object):
@@ -274,96 +280,92 @@ def users_that_like_cat(users, cat_lst):
     return usrs
 
 
+def generate_permutations(filters=None, user_count_cutoff=0, out_format=None):
+    users = FacebookUser.query.filter(FacebookUser.pages)
+    print len(users.all())
+
+    if filters is None:
+        filters = {'age': ['15-25', '25-35', '35-45', '45-55', '55-95'],
+                   'employer': ['Employment.csv', 'NOT::Employment.csv'],
+                   'currentcity': ['Location10th.tsv', 'NOT::Location10th.tsv'],  # noqa
+                   'sex': ['m', 'f']}
+
+    all_permutations = []
+    for key in filters:
+        if all_permutations == []:
+            all_permutations = filters[key]
+        else:
+            all_permutations = [x for x in itertools.product(all_permutations,
+                                filters[key])]
+
+    all_like_dists = []
+    for permutation in all_permutations:
+        print permutation
+        if type(permutation) == list or type(permutation) == tuple:
+            permutation = flatten_tuple(permutation)
+        else:
+            permutation = [permutation]
+        print permutation
+        print "=========="
+        kwargs = {}
+        for idx, key in enumerate(filters):
+            kwargs[key] = permutation[idx]
+
+        print kwargs
+        filtered_users = get_users(users, **kwargs)
+        # print len(filtered_users)
+        if len(filtered_users) > user_count_cutoff:
+            lb_obj = LikeBreakdown(like_breakdown=like_breakdown(
+                                   filtered_users),
+                                   filters=permutation,
+                                   count=len(filtered_users))
+            all_like_dists.append(lb_obj)
+    # print all_like_dists
+
+    diffs = compute_diffs(all_like_dists)
+    # print diffs
+
+    if out_format == 'csv':
+        print "generating csv..."
+        return generate_csv(diffs, all_like_dists)
+    return generate_report(diffs, all_like_dists)
+
 if __name__ == "__main__":
 
-    def main(filters=None, user_count_cutoff=0, out_format=None):
-        USERS = FacebookUser.query.filter(FacebookUser.pages)
-        print len(USERS.all())
-        like_groups = []
-
-        if filters == None:
-            filters = {'age': ['15-25', '25-35', '35-45', '45-55', '55-95'],
-                       'employer': ['Employment.csv', 'NOT::Employment.csv'],
-                       'currentcity': ['Location10th.tsv', 'NOT::Location10th.tsv'],
-                       'sex': ['m', 'f']}
-
-        all_permutations = []
-        for key in filters:
-            if all_permutations == []:
-                all_permutations = filters[key]
-            else:
-                all_permutations = [x for x in itertools.product(all_permutations,
-                                    filters[key])]
-
-        all_like_dists = []
-        for permutation in all_permutations:
-            print permutation
-            if type(permutation) == list or type(permutation) == tuple:
-                permutation = flatten_tuple(permutation)
-            else:
-                permutation = [permutation]
-            print permutation
-            print "=========="
-            kwargs = {}
-            for idx, key in enumerate(filters):
-                kwargs[key] = permutation[idx]
-
-            print kwargs
-            filtered_users = get_users(USERS, **kwargs)
-            # print len(filtered_users)
-            if len(filtered_users) > user_count_cutoff:
-                lb_obj = LikeBreakdown(like_breakdown=like_breakdown(filtered_users),
-                                       filters=permutation, count=len(filtered_users))
-                all_like_dists.append(lb_obj)
-        # print all_like_dists
-
-        diffs = compute_diffs(all_like_dists)
-        # print diffs
-
-        if out_format == 'csv':
-            print "generating csv..."
-            return generate_csv(diffs, all_like_dists)
-        return generate_report(diffs, all_like_dists)
-
+    OUT_FMT = sys.argv[1] if len(sys.argv) > 1 else 'csv'
     USER_COUNT_CUTOFF = 25
-
-    ## add things like:
-        # [<category_name>, [<params to pass to filter function>] ]
-        # NOTE: <category_name> must match a key in the FILTER_FUNS_K dict.
-
-    filter_lst = [
-        #['currentcity', ['Location10th.tsv', 'LocationIL.tsv', 'NOT::Location10th.tsv']],
+    FILTER_LST = [
+        # ['currentcity', ['Location10th.tsv', 'LocationIL.tsv',
+        #                  'NOT::Location10th.tsv']],
         ['sex', ['m', 'f']],
         # ['age', ['15-24', '25-34', '35-44', '45-54', '55-64', '65-99']],
         # ['employer', ['Entry-Level.csv', 'Fortune_1000.csv', 'Intern.csv',
         #               'law.csv', 'Manager.csv', 'medicine.csv',
         #               'owner:founder.csv', 'public_servant.csv',
-        #               'religious.csv', 'retired.csv', 'Senior_leadership.csv',
+        #               'religious.csv', 'retired.csv',
+        #               'Senior_leadership.csv',
         #               'student.csv', 'technology.csv',
         #               'NOT::all_emp_Cats.csv']]
-        ['donor', ['0','1']]
+        ['donor', ['0', '1']]
     ]
 
-    for i in range(len(filter_lst)):
-        print "Iteration %i of permutations." % i
-        cur_filter_lst = filter_lst[i:] + filter_lst[:i]
-        filters = {}
+    def main():
+        """Main function, executed when module is called as script."""
+        for i in range(len(FILTER_LST)):
+            print "Iteration %i of permutations." % i
+            cur_filter_lst = FILTER_LST[i:] + FILTER_LST[:i]
+            filters = {}
 
-        csv_name = 'data/all_slices.csv'
+            csv_name = 'data/all_slices.csv'
 
-        for idx, f in enumerate(cur_filter_lst):
-            filters[f[0]] = f[1]
-            report = main(filters, USER_COUNT_CUTOFF, out_format='csv')
-            fname = str(filters.keys())
-            with open(csv_name, 'a') as f:
-                f.write(report)
+            for idx, cur_filter in enumerate(cur_filter_lst):
+                filters[cur_filter[0]] = cur_filter[1]
+                report = generate_permutations(filters,
+                                               USER_COUNT_CUTOFF,
+                                               out_format=OUT_FMT)
+                # fname = str(filters.keys())
+                with open(csv_name, 'a') as out_file:
+                    out_file.write(report)
 
-        # for idx, f in enumerate(filter_lst):
-        #     filters[f[0]] = f[1]
-        #     report = main(filters, USER_COUNT_CUTOFF)
-        #     fname = str(filters.keys())
-        #     with open(fname,'w') as f:
-        #         f.write(report)
-
-            print "Generated level %i" % idx
-    #main()
+                print "Generated level %i" % idx
+    main()
