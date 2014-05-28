@@ -286,7 +286,7 @@ def get_likes(self, username):
                     transact_type = 'update'
 
                 # logger.debug()
-                self.update_state(state='PROGRESS', meta={'transact_type': transact_type, 'current_result': result.username, 'current_total': len(results)})
+                # self.update_state(state='PROGRESS', meta={'transact_type': transact_type, 'current_result': result.username, 'current_total': len(results)})
 
             except Exception as e:
                 transaction = Transaction(
@@ -302,7 +302,7 @@ def get_likes(self, username):
                     transaction.data = str(result)
 
                 # logger.debug()
-                self.update_state(state='PROGRESS', meta={'transact_type': transact_type, 'current_result': result.username, 'current_total': len(results)})
+                # self.update_state(state='PROGRESS', meta={'transact_type': transact_type, 'current_result': result.username, 'current_total': len(results)})
 
                 db.session.add(transaction)
                 db.session.commit()
@@ -352,7 +352,6 @@ def get_fans(self, pagename):
     results = []
     try:
         for result in facebook_scraper.get_fans(pagename):
-
             try:
 
                 user = FacebookUser.query.filter_by(username=result.username).first()
@@ -364,11 +363,11 @@ def get_fans(self, pagename):
                     db.session.add(user)
                     transact_type = 'create'
                 else:
-                    convert_result(page, result)
+                    convert_result(user, result)
                     transact_type = 'update'
 
                 # logger.debug()
-                self.update_state(state='PROGRESS', meta={'transact_type': transact_type, 'current_result': result.username, 'current_total': len(results)})                
+                # self.update_state(state='PROGRESS', meta={'transact_type': transact_type, 'current_result': result.username, 'current_total': len(results)})                
 
             except Exception as e:
                 transaction = Transaction(
@@ -380,11 +379,12 @@ def get_fans(self, pagename):
                             e.strerror if hasattr(e, 'strerror') else e
                         )
                     )
+                print transaction.__dict__
                 if 'result' in locals():
                     transaction.data = str(result)
 
                 # logger.debug()
-                self.update_state(state='PROGRESS', meta={'transact_type': transact_type, 'current_result': result.username, 'current_total': len(results)})
+                # self.update_state(state='PROGRESS', meta={'transact_type': transact_type, 'current_result': result.username, 'current_total': len(results)})
 
                 db.session.add(transaction)
                 db.session.commit()
@@ -398,7 +398,7 @@ def get_fans(self, pagename):
             transaction = Transaction(
                 timestamp = datetime.utcnow(),
                 transact_type = transact_type,
-                ref = "%s.%s" % (FacebookUser.__tablename__, str(result.page_id)),
+                ref = "%s.%s" % (FacebookUser.__tablename__, str(result.uid)),
                 func = 'get_likes(%s)' % pagename,
                 data = str(result)
             )
@@ -407,7 +407,7 @@ def get_fans(self, pagename):
             db.session.commit()
 
             results.append(result)
-            logger.info( "%s - %i - %s" % (pagename, len(results), result.pagename))
+            logger.info( "%s - %i - %s" % (pagename, len(results), result.username))
 
     except (ScrapingError, ValueError) as e:
         logger.info(e)
