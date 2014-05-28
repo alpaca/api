@@ -302,7 +302,7 @@ def get_likes(self, username):
 
             db.session.add(transaction)
             db.session.commit()
-            return      
+            return
 
         page.updated_at = datetime.now()
         page.users.append(user)
@@ -322,6 +322,85 @@ def get_likes(self, username):
 
         results.append(result)
         logger.info( "%s - %i - %s" % (username, len(results), result.username))
+
+    return results
+
+@celery.task(bind=True)
+def get_fans(self, pagename):
+
+    max_retries = 3
+    for retries in xrange(max_retries + 1):
+        try:
+            page = FacebookPage.query.filter_by(username=pagename).first()
+            break
+        except (DatabaseError, OperationalError):
+            if retries + 1 > max_retries:
+                raise
+
+    if not page: raise Exception("put the page in the db first plz")
+
+    results = []
+    try:
+        for result in facebook_scraper.get_fans(pagename):
+
+            try:
+
+                user = FacebookUser.query.filter_by(username=result.username).first()
+
+                if not user:
+                    user = FacebookUser()
+                    convert_result(user, result)
+                    user.created_at = datetime.now()
+                    db.session.add(user)
+                    transact_type = 'create'
+                else:
+                    convert_result(page, result)
+                    transact_type = 'update'
+
+                # logger.debug()
+                self.update_state(state='PROGRESS', meta={'transact_type': transact_type, 'current_result': result.username, 'current_total': len(results)})                
+
+            except Exception as e:
+                transaction = Transaction(
+                        timestamp = datetime.utcnow(),
+                        transact_type = 'error',
+                        func = 'get_likes(%s)' % username,
+                        ref = "%s: %s" % (
+                            str(e.errno) if hasattr(e, 'errno') else 0, 
+                            e.strerror if hasattr(e, 'strerror') else e
+                        )
+                    )
+                if 'result' in locals():
+                    transaction.data = str(result)
+
+                # logger.debug()
+                self.update_state(state='PROGRESS', meta={'transact_type': transact_type, 'current_result': result.username, 'current_total': len(results)})
+
+                db.session.add(transaction)
+                db.session.commit()
+                continue
+
+            user.updated_at = datetime.now()
+            user.pages.append(page)
+
+            ## Scrape Transaction
+            
+            transaction = Transaction(
+                timestamp = datetime.utcnow(),
+                transact_type = transact_type,
+                ref = "%s.%s" % (FacebookUser.__tablename__, str(result.page_id)),
+                func = 'get_likes(%s)' % username,
+                data = str(result)
+            )
+
+            db.session.add(transaction)
+            db.session.commit()
+
+            results.append(result)
+            logger.info( "%s - %i - %s" % (username, len(results), result.username))
+
+    except Exception as e:
+        continue
 
     return results
 
