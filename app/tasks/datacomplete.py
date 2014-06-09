@@ -116,6 +116,17 @@ def mark_donors(fname):
     db.session.commit()
     return
 
+def mark_nu(fname):
+    uids = []
+    with open(fname,'r') as f:
+        for line in f:
+            uids.append(int(line.rstrip(' \n').lstrip(' \n')))
+
+    for user in FacebookUser.query:
+        user.nu = 1 if user.uid in uids else 0
+    db.session.commit()
+    return
+
 def gen_Contact_Times():
 
     # employer_categories = readEmploy()
