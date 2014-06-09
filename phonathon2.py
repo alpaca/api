@@ -71,10 +71,11 @@ with open('data.csv', 'rU') as csvfile:
         if user['Activity1']:
             asks.append("They were involved with %s." % user['Activity1'])
 
-        GradDate = datetime.datetime.strptime(user['GradDate1'], "%m%Y")
+        if user['GradDate1']:
+            GradDate = datetime.datetime.strptime(user['GradDate1'], "%m%Y")
         
-        if GradDate.year in [2010, 2005, 2000, 1995, 1990, 1985, 1980]:
-            asks.append("It's a notable reunion year for the class of %i." % GradDate.year)
+            if GradDate.year in [2010, 2005, 2000, 1995, 1990, 1985, 1980]:
+                asks.append("It's a notable reunion year for the class of %i." % GradDate.year)
 
         # if user['Major1']:
         #     asks.append("Ask about studying %s" % user['Major1'])
